@@ -1,455 +1,539 @@
-import random
-import time
-import os
+<!doctype html>
+<html lang="tr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>STRANDED: WILDERNESS 3D</title>
+<style>
+  *{box-sizing:border-box}
+  html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#07110b;color:#fff;font-family:Arial,sans-serif}
+  canvas{display:block;width:100%;height:100%;cursor:crosshair}
+  #hud{position:fixed;inset:0;pointer-events:none}
+  .panel{background:rgba(7,12,9,.76);border:1px solid rgba(255,255,255,.14);border-radius:12px;backdrop-filter:blur(5px)}
+  #stats{position:absolute;left:16px;top:16px;width:265px;padding:12px}
+  #stats h1{font-size:16px;letter-spacing:2px;margin:0 0 10px;color:#f0d783}
+  .bar{height:14px;border-radius:7px;background:#1c241e;margin:7px 0;overflow:hidden;position:relative}
+  .fill{height:100%;width:50%;transition:width .15s}
+  .label{position:absolute;left:7px;top:0;font-size:11px;line-height:14px;text-shadow:0 1px 2px #000}
+  #inv{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin-top:10px;font-size:12px}
+  .slot{background:rgba(255,255,255,.06);padding:7px;border-radius:7px;text-align:center}
+  #help{position:absolute;left:16px;bottom:16px;width:360px;padding:10px;font-size:12px;line-height:1.5;color:#d9e1da}
+  #prompt{position:absolute;left:50%;top:58%;transform:translate(-50%,-50%);padding:10px 14px;font-weight:700;background:rgba(0,0,0,.58);border-radius:9px;display:none}
+  #cross{position:absolute;left:50%;top:50%;width:10px;height:10px;margin:-5px;border:1px solid rgba(255,255,255,.8);border-radius:50%}
+  #message{position:absolute;left:50%;bottom:24px;transform:translateX(-50%);padding:10px 14px;background:rgba(0,0,0,.68);border-radius:8px;font-size:13px;min-width:300px;text-align:center;opacity:0;transition:opacity .2s}
+  #craft{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);width:min(620px,92vw);padding:18px;display:none;pointer-events:auto}
+  #craft h2{margin:0 0 8px}
+  #craft .sub{color:#aab8ad;font-size:12px;margin-bottom:12px}
+  #recipes{display:grid;grid-template-columns:repeat(2,1fr);gap:8px}
+  .recipe{background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.08);padding:10px;border-radius:9px}
+  .recipe b{display:block;margin-bottom:4px}
+  .recipe span{display:block;font-size:11px;color:#aebbb1;margin-bottom:8px}
+  button{border:0;border-radius:8px;padding:8px 10px;font-weight:700;cursor:pointer;background:#d5b64b;color:#111}
+  button:disabled{opacity:.35;cursor:not-allowed}
+  #title{position:absolute;left:50%;top:10px;transform:translateX(-50%);font-weight:800;letter-spacing:3px;font-size:14px;color:#e3d38f;text-shadow:0 2px 4px #000}
+  #start,#dead{position:fixed;inset:0;background:radial-gradient(circle at center,rgba(25,52,35,.55),rgba(2,5,4,.94));display:flex;align-items:center;justify-content:center;z-index:10}
+  #start .box,#dead .box{width:min(640px,90vw);padding:28px}
+  #start h1{font-size:34px;letter-spacing:5px;margin:0 0 8px}
+  #start p{color:#c0cbc2;line-height:1.5}
+  #start .keys{margin:16px 0;padding:12px;background:rgba(255,255,255,.05);border-radius:10px;font-size:13px;line-height:1.55}
+  #start button{font-size:16px;padding:11px 17px}
+  #buildbar{position:absolute;right:16px;bottom:16px;width:290px;padding:10px;display:none}
+  #buildbar b{color:#e7ce73}
+  #builditems{display:grid;grid-template-columns:repeat(4,1fr);gap:5px;margin-top:8px}
+  .buildslot{padding:7px 4px;border-radius:7px;background:rgba(255,255,255,.05);font-size:10px;text-align:center;border:1px solid rgba(255,255,255,.07)}
+  .buildslot.active{border-color:#e0c25d;background:rgba(224,194,93,.14)}
+</style>
+</head>
+<body>
+<canvas id="gl"></canvas>
 
-# ========== OYUNCU SINIFI ==========
-class Player:
-    def __init__(self, name):
-        self.name = name
-        self.health = 100
-        self.max_health = 100
-        self.hunger = 100
-        self.thirst = 100
-        self.inventory = []
-        self.equipped_armor = None
-        self.armor_defense = 0
-        self.day = 1
-        
-    def is_alive(self):
-        return self.health > 0 and self.hunger > 0 and self.thirst > 0
-        
-    def show_stats(self):
-        print("\n" + "="*40)
-        print(f"👤 {self.name} | Gün: {self.day}")
-        print(f"❤️ Can: {self.health}/{self.max_health}")
-        
-        # Can barı
-        health_bar = "█" * int(self.health/10) + "░" * (10 - int(self.health/10))
-        print(f"   [{health_bar}]")
-        
-        print(f"🍖 Açlık: {self.hunger}/100")
-        hunger_bar = "█" * int(self.hunger/10) + "░" * (10 - int(self.hunger/10))
-        print(f"   [{hunger_bar}]")
-        
-        print(f"💧 Susuzluk: {self.thirst}/100")
-        thirst_bar = "█" * int(self.thirst/10) + "░" * (10 - int(self.thirst/10))
-        print(f"   [{thirst_bar}]")
-        
-        if self.equipped_armor:
-            print(f"🛡️ Giyilen Zırh: {self.equipped_armor} (+{self.armor_defense} savunma)")
-        else:
-            print(f"🛡️ Giyilen Zırh: Yok")
-        print("="*40)
-        
-    def show_inventory(self):
-        print("\n" + "="*40)
-        print("🎒 ENVANTER")
-        if not self.inventory:
-            print("   Boş!")
-        else:
-            for item in self.inventory:
-                print(f"   • {item}")
-        print("="*40)
-        
-    def add_item(self, item):
-        self.inventory.append(item)
-        print(f"📦 {item} envantere eklendi!")
-        
-    def remove_item(self, item):
-        if item in self.inventory:
-            self.inventory.remove(item)
-            return True
-        return False
-        
-    def take_damage(self, damage):
-        actual_damage = max(1, damage - self.armor_defense)
-        self.health -= actual_damage
-        print(f"💔 {actual_damage} hasar aldın! Can: {self.health}")
-        
-    def use_item(self, item):
-        if item == "Meyve" and item in self.inventory:
-            self.hunger = min(100, self.hunger + 20)
-            self.thirst = min(100, self.thirst + 10)
-            self.remove_item(item)
-            print("🍎 Meyve yedin. Açlık +20, Susuzluk +10")
-            return True
-            
-        elif item == "Su Şişesi" and item in self.inventory:
-            self.thirst = min(100, self.thirst + 40)
-            self.remove_item(item)
-            print("💧 Su içtin. Susuzluk +40")
-            return True
-            
-        elif item == "Et" and item in self.inventory:
-            self.hunger = min(100, self.hunger + 35)
-            self.remove_item(item)
-            print("🍖 Et yedin. Açlık +35")
-            return True
-            
-        elif "Deri Zırh" in item and item in self.inventory:
-            self.equip_armor(item)
-            return True
-            
-        return False
-        
-    def equip_armor(self, armor):
-        self.equipped_armor = armor
-        if "Deri Zırh (Göğüslük)" in armor:
-            self.armor_defense = 5
-        elif "Deri Zırh (Pantolon)" in armor:
-            self.armor_defense = 3
-        elif "Deri Zırh (Başlık)" in armor:
-            self.armor_defense = 2
-        elif "Kürk Zırh" in armor:
-            self.armor_defense = 8
-        print(f"✨ {armor} giyildi! Savunma +{self.armor_defense}")
+<div id="hud">
+  <div id="title">STRANDED: WILDERNESS · 3D SURVIVAL</div>
+  <div id="cross"></div>
+  <div id="stats" class="panel">
+    <h1>HAYATTA KAL</h1>
+    <div class="bar"><div id="health" class="fill" style="background:#c45b56"></div><div class="label">Sağlık</div></div>
+    <div class="bar"><div id="hunger" class="fill" style="background:#d7a94c"></div><div class="label">Açlık</div></div>
+    <div class="bar"><div id="thirst" class="fill" style="background:#4d9bc7"></div><div class="label">Susuzluk</div></div>
+    <div class="bar"><div id="warmth" class="fill" style="background:#cc7d49"></div><div class="label">Sıcaklık</div></div>
+    <div id="inv">
+      <div class="slot">🪵 <span id="wood">0</span></div>
+      <div class="slot">🪨 <span id="stone">0</span></div>
+      <div class="slot">🧵 <span id="fiber">0</span></div>
+      <div class="slot">🍖 <span id="food">0</span></div>
+      <div class="slot">💧 <span id="water">0</span></div>
+      <div class="slot">⛽ <span id="fuel">0</span>L</div>
+    </div>
+  </div>
 
+  <div id="help" class="panel">
+    <b>Kontroller</b><br>
+    WASD: hareket · Mouse: bak · E: kes/topla · C: crafting · B: inşa modu ·
+    1-4: yapı seç · Sol tık: yerleştir · Q: yemek · G: su · R: arabaya yakıt
+  </div>
 
-# ========== CRAFTING TARİFLERİ ==========
-crafting_recipes = {
-    "Halat": {"Odun": 2, "Bitki Lifi": 3},
-    "Taş Balta": {"Odun": 3, "Taş": 2, "Halat": 1},
-    "Taş Mızrak": {"Odun": 4, "Taş": 3, "Halat": 1},
-    "Deri Zırh (Göğüslük)": {"Deri": 5, "Halat": 2},
-    "Deri Zırh (Pantolon)": {"Deri": 3, "Halat": 1},
-    "Deri Zırh (Başlık)": {"Deri": 2, "Halat": 1},
-    "Kürk Zırh": {"Kürk": 6, "Halat": 3},
-    "Ateş": {"Odun": 5, "Taş": 2},
-    "Barınak": {"Odun": 10, "Taş": 5, "Halat": 3}
+  <div id="prompt"></div>
+  <div id="message"></div>
+
+  <div id="buildbar" class="panel">
+    <b>İNŞA MODU</b> · seç: 1-4
+    <div id="builditems">
+      <div id="bs1" class="buildslot active">1<br>Temel</div>
+      <div id="bs2" class="buildslot">2<br>Duvar</div>
+      <div id="bs3" class="buildslot">3<br>Kapı</div>
+      <div id="bs4" class="buildslot">4<br>Çatı</div>
+    </div>
+  </div>
+
+  <div id="craft" class="panel">
+    <h2>CRAFTING</h2>
+    <div class="sub">Kaynaklarını kullanarak ekipman ve barınak parçaları üret.</div>
+    <div id="recipes"></div>
+    <div style="margin-top:12px;text-align:right"><button id="closeCraft">Kapat (C)</button></div>
+  </div>
+</div>
+
+<div id="start">
+  <div class="box panel">
+    <h1>STRANDED: WILDERNESS</h1>
+    <p><b>3D prototip</b> — Arabanın benzini bitti. Ormanda kaldın. İlk geceyi atlat, kaynak topla ve kendi barınağını craft'layıp kur.</p>
+    <div class="keys">
+      <b>İlk hedef:</b> Balta craftla → ağaç kes → odun/topla → ateş ve barınak yap.<br>
+      <b>Not:</b> Barınak parçalarını craftladıktan sonra <b>B</b> ile inşa moduna girip 1-4 ile parça seçebilirsin.
+    </div>
+    <button id="startBtn">OYUNA GİR</button>
+  </div>
+</div>
+
+<div id="dead">
+  <div class="box panel">
+    <h2>HAYATTA KALAMADIN</h2>
+    <p id="deadReason"></p>
+    <button onclick="location.reload()">TEKRAR OYNA</button>
+  </div>
+</div>
+
+<script>
+/* Minimal, dependency-free WebGL 3D engine for this prototype. */
+
+const canvas=document.getElementById('gl');
+const gl=canvas.getContext('webgl',{antialias:true,alpha:false});
+if(!gl){alert('WebGL desteklenmiyor. Güncel Chrome/Edge ile aç.');}
+
+function resize(){const d=Math.min(devicePixelRatio||1,2);canvas.width=innerWidth*d;canvas.height=innerHeight*d;gl.viewport(0,0,canvas.width,canvas.height);}
+addEventListener('resize',resize); resize();
+
+const vs=`
+attribute vec3 aPos;
+attribute vec3 aNormal;
+attribute vec3 aColor;
+uniform mat4 uMVP;
+uniform mat4 uModel;
+varying vec3 vN;
+varying vec3 vC;
+varying vec3 vW;
+void main(){
+  vec4 w=uModel*vec4(aPos,1.0);
+  vW=w.xyz;
+  vN=mat3(uModel)*aNormal;
+  vC=aColor;
+  gl_Position=uMVP*vec4(aPos,1.0);
+}`;
+const fs=`
+precision mediump float;
+varying vec3 vN;
+varying vec3 vC;
+varying vec3 vW;
+uniform vec3 uLight;
+uniform float uFog;
+void main(){
+  vec3 n=normalize(vN);
+  float d=max(dot(n,normalize(uLight)),0.0);
+  float light=0.36+d*0.72;
+  vec3 c=vC*light;
+  float fog=smoothstep(35.0,115.0,vW.y>0.0?length(vW.xz):length(vW.xz));
+  c=mix(c,vec3(0.10,0.16,0.12),fog*0.28);
+  gl_FragColor=vec4(c,1.0);
+}`;
+function compile(type,src){const s=gl.createShader(type);gl.shaderSource(s,src);gl.compileShader(s);if(!gl.getShaderParameter(s,gl.COMPILE_STATUS))throw new Error(gl.getShaderInfoLog(s));return s;}
+const prog=gl.createProgram();gl.attachShader(prog,compile(gl.VERTEX_SHADER,vs));gl.attachShader(prog,compile(gl.FRAGMENT_SHADER,fs));gl.linkProgram(prog);
+gl.useProgram(prog);
+const aPos=gl.getAttribLocation(prog,'aPos'),aNormal=gl.getAttribLocation(prog,'aNormal'),aColor=gl.getAttribLocation(prog,'aColor');
+const uMVP=gl.getUniformLocation(prog,'uMVP'),uModel=gl.getUniformLocation(prog,'uModel'),uLight=gl.getUniformLocation(prog,'uLight');
+
+function mat4Identity(){return [1,0,0,0,0,1,0,0,0,0,1,0,0,0,0,1];}
+function mat4Mul(a,b){
+  const o=new Array(16);
+  for(let c=0;c<4;c++)for(let r=0;r<4;r++)o[c*4+r]=
+    a[0*4+r]*b[c*4+0]+a[1*4+r]*b[c*4+1]+a[2*4+r]*b[c*4+2]+a[3*4+r]*b[c*4+3];
+  return o;
+}
+function mat4Translate(x,y,z){const m=mat4Identity();m[12]=x;m[13]=y;m[14]=z;return m;}
+function mat4Scale(x,y,z){const m=mat4Identity();m[0]=x;m[5]=y;m[10]=z;return m;}
+function mat4RotY(a){const c=Math.cos(a),s=Math.sin(a);return [c,0,-s,0,0,1,0,0,s,0,c,0,0,0,0,1];}
+function mat4Perspective(fov,aspect,n,f){
+  const t=1/Math.tan(fov/2), nf=1/(n-f);
+  return [t/aspect,0,0,0,0,t,0,0,0,0,(f+n)*nf,-1,0,0,(2*f*n)*nf,0];
+}
+function vSub(a,b){return [a[0]-b[0],a[1]-b[1],a[2]-b[2]];}
+function vCross(a,b){return [a[1]*b[2]-a[2]*b[1],a[2]*b[0]-a[0]*b[2],a[0]*b[1]-a[1]*b[0]];}
+function vNorm(a){const l=Math.hypot(...a)||1;return [a[0]/l,a[1]/l,a[2]/l];}
+function lookAt(pos,target,up){
+  const z=vNorm(vSub(pos,target)), x=vNorm(vCross(up,z)), y=vCross(z,x);
+  return [x[0],y[0],z[0],0,x[1],y[1],z[1],0,x[2],y[2],z[2],0,-(x[0]*pos[0]+x[1]*pos[1]+x[2]*pos[2]),-(y[0]*pos[0]+y[1]*pos[1]+y[2]*pos[2]),-(z[0]*pos[0]+z[1]*pos[1]+z[2]*pos[2]),1];
 }
 
+function mesh(positions,normals,colors,indices){
+  const vao={};
+  vao.p=gl.createBuffer();gl.bindBuffer(gl.ARRAY_BUFFER,vao.p);gl.bufferData(gl.ARRAY_BUFFER,new Float32Array(positions),gl.STATIC_DRAW);
+  vao.n=gl.createBuffer();gl.bindBuffer(gl.ARRAY_BUFFER,vao.n);gl.bufferData(gl.ARRAY_BUFFER,new Float32Array(normals),gl.STATIC_DRAW);
+  vao.c=gl.createBuffer();gl.bindBuffer(gl.ARRAY_BUFFER,vao.c);gl.bufferData(gl.ARRAY_BUFFER,new Float32Array(colors),gl.STATIC_DRAW);
+  vao.i=gl.createBuffer();gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER,vao.i);gl.bufferData(gl.ELEMENT_ARRAY_BUFFER,new Uint16Array(indices),gl.STATIC_DRAW);
+  vao.count=indices.length; vao.vertexCount=positions.length/3; return vao;
+}
+function cubeMesh(){
+  const p=[],n=[],c=[],idx=[]; const faces=[
+    [[0,0,1],[[-1,-1,1],[1,-1,1],[1,1,1],[-1,1,1]]],
+    [[0,0,-1],[[1,-1,-1],[-1,-1,-1],[-1,1,-1],[1,1,-1]]],
+    [[1,0,0],[[1,-1,1],[1,-1,-1],[1,1,-1],[1,1,1]]],
+    [[-1,0,0],[[-1,-1,-1],[-1,-1,1],[-1,1,1],[-1,1,-1]]],
+    [[0,1,0],[[-1,1,1],[1,1,1],[1,1,-1],[-1,1,-1]]],
+    [[0,-1,0],[[-1,-1,-1],[1,-1,-1],[1,-1,1],[-1,-1,1]]]
+  ];
+  for(const f of faces){const base=p.length/3;for(const q of f[1]){p.push(q[0]*.5,q[1]*.5,q[2]*.5);n.push(...f[0]);c.push(1,1,1);}idx.push(base,base+1,base+2,base,base+2,base+3);}
+  return mesh(p,n,c,idx);
+}
+function cylinderMesh(segments=12){
+  const p=[],n=[],c=[],idx=[];
+  for(let y=0;y<=1;y++){for(let i=0;i<segments;i++){const a=i/segments*Math.PI*2; p.push(Math.cos(a)*.5,y-.5,Math.sin(a)*.5); n.push(Math.cos(a),0,Math.sin(a)); c.push(1,1,1);}}
+  for(let i=0;i<segments;i++){const j=(i+1)%segments;idx.push(i,j,segments+i,j,segments+j,segments+i);}
+  return mesh(p,n,c,idx);
+}
+function coneMesh(segments=14){
+  const p=[],n=[],c=[],idx=[]; const apex=segments, base=segments*2;
+  for(let i=0;i<segments;i++){const a=i/segments*Math.PI*2;p.push(Math.cos(a)*.6,0,Math.sin(a)*.6);n.push(Math.cos(a),.4,Math.sin(a));c.push(1,1,1);}
+  p.push(0,1.25,0);n.push(0,1,0);c.push(1,1,1);
+  p.push(0,0,0);n.push(0,-1,0);c.push(1,1,1);
+  for(let i=0;i<segments;i++){const j=(i+1)%segments;idx.push(i,j,apex);idx.push(base,j,i);}
+  return mesh(p,n,c,idx);
+}
+const CUBE=cubeMesh(), CYL=cylinderMesh(), CONE=coneMesh();
 
-# ========== DÜNYA SINIFI ==========
-class World:
-    def __init__(self):
-        self.locations = {
-            "orman": ["ağaç", "yabani meyve", "kurt", "ayı", "bitki", "tavşan"],
-            "mağara": ["taş", "eski sandık", "yabani meyve", "kurt", "taş"],
-            "nehir": ["su", "bitki", "balık", "tavşan", "taş", "yabani meyve"],
-            "harabe": ["eski sandık", "taş", "kurt", "bitki", "eski sandık"]
-        }
-        
-    def gather(self, location):
-        if location not in self.locations:
-            return None, None
-            
-        possible_items = {
-            "ağaç": "Odun",
-            "taş": "Taş",
-            "yabani meyve": "Meyve",
-            "bitki": "Bitki Lifi",
-            "su": "Su Şişesi",
-            "balık": "Et"
-        }
-        
-        available = []
-        for item in self.locations[location]:
-            if item in possible_items:
-                available.append(possible_items[item])
-                
-        if not available:
-            return None, None
-            
-        found = random.choice(available)
-        
-        # Özel toplama miktarları
-        if found == "Odun":
-            amount = random.randint(1, 3)
-            return found, amount
-        elif found == "Taş":
-            amount = random.randint(1, 2)
-            return found, amount
-        elif found == "Bitki Lifi":
-            amount = random.randint(1, 4)
-            return found, amount
-        else:
-            return found, 1
-            
-    def hunt(self, location):
-        animals = {
-            "orman": ["tavşan", "kurt", "ayı"],
-            "mağara": ["kurt"],
-            "nehir": ["balık", "tavşan"],
-            "harabe": ["kurt"]
-        }
-        
-        if location not in animals:
-            return None, None
-            
-        animal = random.choice(animals[location])
-        
-        if animal == "tavşan":
-            success_chance = 0.8
-            drops = ["Et", "Deri"]
-            count = random.randint(1, 2)
-            damage = 5
-        elif animal == "balık":
-            success_chance = 0.7
-            drops = ["Et"]
-            count = 1
-            damage = 3
-        elif animal == "kurt":
-            success_chance = 0.5
-            drops = ["Et", "Deri", "Kürk"]
-            count = random.randint(1, 2)
-            damage = 20
-        elif animal == "ayı":
-            success_chance = 0.3
-            drops = ["Et", "Deri", "Kürk"]
-            count = random.randint(2, 4)
-            damage = 35
-            
-        return {
-            "animal": animal,
-            "success_chance": success_chance,
-            "drops": drops,
-            "count": count,
-            "damage": damage
-        }
-        
-    def explore_ruins(self):
-        loot_table = [
-            ("Odun", random.randint(2, 5), 80),
-            ("Taş", random.randint(1, 3), 70),
-            ("Meyve", 1, 60),
-            ("Su Şişesi", 1, 50),
-            ("Et", 1, 40),
-            ("Deri", random.randint(1, 2), 35),
-            ("Halat", 1, 30),
-            ("Altın Kolye", 1, 10),
-            ("Elmas", 1, 5)
-        ]
-        
-        found_items = []
-        for item, amount, chance in loot_table:
-            if random.randint(1, 100) <= chance:
-                found_items.append((item, amount))
-                
-        # Harabe tehlikesi
-        danger = random.choice([None, "kurt", "tuzak", "çöküş"])
-        
-        return found_items, danger
+function draw(meshObj,model,color){
+  gl.bindBuffer(gl.ARRAY_BUFFER,meshObj.p);gl.enableVertexAttribArray(aPos);gl.vertexAttribPointer(aPos,3,gl.FLOAT,false,0,0);
+  gl.bindBuffer(gl.ARRAY_BUFFER,meshObj.n);gl.enableVertexAttribArray(aNormal);gl.vertexAttribPointer(aNormal,3,gl.FLOAT,false,0,0);
+  const cs=[];for(let i=0;i<meshObj.count/6*4*0;i++){}
+  gl.bindBuffer(gl.ARRAY_BUFFER,meshObj.c);gl.enableVertexAttribArray(aColor);gl.vertexAttribPointer(aColor,3,gl.FLOAT,false,0,0);
+  gl.uniformMatrix4fv(uModel,false,new Float32Array(model));
+  gl.drawElements(gl.TRIANGLES,meshObj.count,gl.UNSIGNED_SHORT,0);
+}
+function model(x,y,z,sx,sy,sz,ry=0){return mat4Mul(mat4Translate(x,y,z),mat4Mul(mat4RotY(ry),mat4Scale(sx,sy,sz)));}
 
+const colorByType={
+  ground:[0.12,0.28,0.15],
+  trunk:[0.31,0.18,0.09],
+  leaf:[0.08,0.26,0.12],
+  rock:[0.30,0.31,0.28],
+  car:[0.45,0.07,0.10],
+  glass:[0.25,0.36,0.40],
+  wood:[0.49,0.30,0.13],
+  roof:[0.26,0.17,0.09],
+  metal:[0.34,0.38,0.36],
+  fire:[0.92,0.39,0.08]
+};
 
-# ========== OYUN ==========
-def clear_screen():
-    os.system('cls' if os.name == 'nt' else 'clear')
+function setMeshColor(arr, col){
+  gl.bindBuffer(gl.ARRAY_BUFFER,arr.c);
+  const data=col; const count=arr.count/3;
+  const out=new Float32Array(count*3); for(let i=0;i<count;i++){out[i*3]=data[0];out[i*3+1]=data[1];out[i*3+2]=data[2];}
+  gl.bufferData(gl.ARRAY_BUFFER,out,gl.DYNAMIC_DRAW);
+}
+for(const c of Object.values([CUBE,CYL,CONE])){}
+setMeshColor(CUBE,colorByType.wood); // overwritten per draw via color attribute replacement helper
+function drawColored(m,mdl,col){
+  gl.bindBuffer(gl.ARRAY_BUFFER,m.p);gl.enableVertexAttribArray(aPos);gl.vertexAttribPointer(aPos,3,gl.FLOAT,false,0,0);
+  gl.bindBuffer(gl.ARRAY_BUFFER,m.n);gl.enableVertexAttribArray(aNormal);gl.vertexAttribPointer(aNormal,3,gl.FLOAT,false,0,0);
+  gl.bindBuffer(gl.ARRAY_BUFFER,m.c);gl.enableVertexAttribArray(aColor);gl.vertexAttribPointer(aColor,3,gl.FLOAT,false,0,0);
+  const out=new Float32Array(m.vertexCount*3);for(let i=0;i<m.vertexCount;i++){out[i*3]=col[0];out[i*3+1]=col[1];out[i*3+2]=col[2];}
+  gl.bufferSubData(gl.ARRAY_BUFFER,0,out);
+  gl.uniformMatrix4fv(uModel,false,new Float32Array(mdl));gl.drawElements(gl.TRIANGLES,m.count,gl.UNSIGNED_SHORT,0);
+}
 
+const world={size:100,trees:[],rocks:[],berries:[],builds:[]};
+function rnd(a,b){return a+Math.random()*(b-a);}
+for(let i=0;i<95;i++){let x=rnd(-48,48),z=rnd(-48,48);if(Math.hypot(x,z)<8){i--;continue;}world.trees.push({x,z,hits:0,alive:true});}
+for(let i=0;i<48;i++)world.rocks.push({x:rnd(-48,48),z:rnd(-48,48)});
+for(let i=0;i<32;i++)world.berries.push({x:rnd(-48,48),z:rnd(-48,48),taken:false});
 
-def craft_item(player):
-    print("\n" + "="*40)
-    print("🔨 CRAFTING (Üretim)")
-    print("Mevcut tarifler:")
-    
-    recipes = list(crafting_recipes.keys())
-    for i, recipe in enumerate(recipes, 1):
-        print(f"   {i}. {recipe}")
-    
-    print("   0. Geri")
-    
-    choice = input("\nSeçim (0-{}): ".format(len(recipes))).strip()
-    
-    if not choice.isdigit() or int(choice) == 0:
-        return
-        
-    choice = int(choice)
-    if 1 <= choice <= len(recipes):
-        recipe_name = recipes[choice-1]
-        requirements = crafting_recipes[recipe_name]
-        
-        # Malzemeleri kontrol et
-        can_craft = True
-        for req_item, req_amount in requirements.items():
-            count = player.inventory.count(req_item)
-            if count < req_amount:
-                print(f"❌ Yetersiz: {req_item} ({count}/{req_amount})")
-                can_craft = False
-                
-        if can_craft:
-            # Malzemeleri harca
-            for req_item, req_amount in requirements.items():
-                for _ in range(req_amount):
-                    player.remove_item(req_item)
-            # Ürünü ekle
-            if recipe_name == "Ateş":
-                print("🔥 Ateş yaktın! Soğuktan korunuyorsun.")
-            elif recipe_name == "Barınak":
-                print("🏠 Bir barınak inşa ettin! Güvende hissediyorsun.")
-            else:
-                player.add_item(recipe_name)
-                print(f"✅ {recipe_name} üretildi!")
-        else:
-            print("❌ Malzemeler yetersiz!")
-            
-    input("\nDevam etmek için Enter'a bas...")
+const car={x:-5,z:2,fuel:0};
+const player={x:1,y:1.75,z:5,yaw:0,pitch:0,health:100,hunger:86,thirst:82,warmth:78,wood:4,stone:2,fiber:0,food:2,water:2,fuel:0,axe:false,campfire:false,fireLife:0,build:{foundation:0,wall:0,door:0,roof:0}};
 
+let started=false,paused=false,craftOpen=false,buildMode=false,buildType=1,last=performance.now(),day=1,clock=9;
+let nearPrompt="",messageTimer=0;
 
-def main():
-    clear_screen()
-    print("="*50)
-    print("      🌲 HAYATTA KALMA OYUNU 🌲")
-    print("="*50)
-    print("\nBir uçak kazası geçirdin...")
-    print("Bu adada tek başınasın.")
-    print("Hayatta kalmak için topla, avlan, üret ve mücadele et!\n")
-    
-    name = input("Karakterinin adı: ").strip()
-    if not name:
-        name = "Hayatta Kalan"
-        
-    player = Player(name)
-    world = World()
-    
-    print(f"\nHoş geldin, {name}!")
-    print("Her gün bir aksiyon seçmelisin.")
-    print("Açlık ve susuzluk her gün azalır.")
-    print("Hayatta kal! 🏝️\n")
-    input("Başlamak için Enter'a bas...")
-    
-    # Oyun döngüsü
-    while player.is_alive():
-        clear_screen()
-        player.show_stats()
-        
-        # Gün başı açlık/susuzluk düşüşü
-        if player.day > 1:
-            player.hunger -= random.randint(5, 10)
-            player.thirst -= random.randint(8, 15)
-            player.hunger = max(0, player.hunger)
-            player.thirst = max(0, player.thirst)
-            
-        if not player.is_alive():
-            break
-            
-        # Menü
-        print("\n📍 Nereye gitmek istersin?")
-        print("   1. 🌲 Orman (Odun, Meyve, Av)") 
-        print("   2. ⛰️ Mağara (Taş, Sandık)")
-        print("   3. 💧 Nehir (Su, Balık)")
-        print("   4. 🏚️ Harabe (Eşya topla - Tehlikeli!)")
-        print("   5. 🎒 Envanteri göster")
-        print("   6. 🔨 Crafting (Üretim yap)")
-        print("   7. 📦 Envanterden kullan")
-        print("   8. 😴 Günü bitir")
-        
-        choice = input("\nSeçim (1-8): ").strip()
-        
-        if choice == "1" or choice == "2" or choice == "3" or choice == "4":
-            location_map = {"1": "orman", "2": "mağara", "3": "nehir", "4": "harabe"}
-            location = location_map[choice]
-            
-            print(f"\n📍 {location.upper()} bölgesindesin.")
-            print("Ne yapmak istersin?")
-            print("   a) Toplama yap (ağaç, taş, meyve, bitki)")
-            print("   b) Avlan (hayvanları öldür, deri/et topla)")
-            if location == "harabe":
-                print("   c) Harabeyi keşfet (eşya topla - RISK!)")
-            
-            action = input("\nSeçim (a/b/c): ").strip().lower()
-            
-            if action == "a":
-                item, amount = world.gather(location)
-                if item:
-                    if amount > 1:
-                        for _ in range(amount):
-                            player.add_item(item)
-                        print(f"✅ {amount} adet {item} topladın!")
-                    else:
-                        player.add_item(item)
-                else:
-                    print("❌ Burada toplanacak bir şey bulamadın!")
-                    
-            elif action == "b":
-                hunt_info = world.hunt(location)
-                if hunt_info:
-                    print(f"\n🐺 Bir {hunt_info['animal']} gördün!")
-                    time.sleep(1)
-                    
-                    if random.random() < hunt_info['success_chance']:
-                        print(f"⚔️ {hunt_info['animal']} ile savaştın ve kazandın!")
-                        for drop in hunt_info['drops']:
-                            count = hunt_info['count']
-                            for _ in range(count):
-                                player.add_item(drop)
-                            print(f"📦 {count} adet {drop} kazandın!")
-                    else:
-                        print(f"💀 {hunt_info['animal']} seni yaraladı!")
-                        player.take_damage(hunt_info['damage'])
-                else:
-                    print("❌ Burada avlanacak hayvan yok!")
-                    
-            elif action == "c" and location == "harabe":
-                found_items, danger = world.explore_ruins()
-                
-                if danger:
-                    print(f"\n⚠️ TEHLİKE: {danger.upper()}!")
-                    if danger == "kurt":
-                        print("Bir kurt sana saldırdı!")
-                        player.take_damage(20)
-                    elif danger == "tuzak":
-                        print("Bir tuzağa düştün!")
-                        player.take_damage(15)
-                    elif danger == "çöküş":
-                        print("Harabe çökmeye başladı! Kaçtın ama yaralandın.")
-                        player.take_damage(10)
-                        
-                if found_items:
-                    print("\n📦 Harabede şunları buldun:")
-                    for item, amount in found_items:
-                        for _ in range(amount):
-                            player.add_item(item)
-                        print(f"   • {item} x{amount}")
-                else:
-                    print("\n📦 Harabede hiçbir şey bulamadın...")
-                    
-        elif choice == "5":
-            player.show_inventory()
-            input("\nDevam etmek için Enter'a bas...")
-            
-        elif choice == "6":
-            craft_item(player)
-            
-        elif choice == "7":
-            player.show_inventory()
-            item = input("\nKullanmak istediğin eşya: ").strip()
-            player.use_item(item)
-            input("\nDevam etmek için Enter'a bas...")
-            
-        elif choice == "8":
-            player.day += 1
-            print(f"\n🌙 Gün {player.day-1} bitti. Yeni gün başlıyor...")
-            time.sleep(1)
-            
-        else:
-            print("❌ Geçersiz seçim!")
-            
-        # Açlık/susuzluk kontrolü
-        if player.hunger <= 0:
-            print("\n💀 Açlıktan ölüyorsun!")
-            player.take_damage(10)
-        if player.thirst <= 0:
-            print("\n💀 Susuzluktan ölüyorsun!")
-            player.take_damage(10)
-            
-        time.sleep(1)
-        
-    # Oyun bitti
-    clear_screen()
-    print("="*40)
-    print("💀 GAME OVER 💀")
-    print("="*40)
-    print(f"\n{player.name} {player.day} gün hayatta kaldı!")
-    
-    if player.health <= 0:
-        print("Ölüm nedeni: Canın tükendi...")
-    elif player.hunger <= 0:
-        print("Ölüm nedeni: Açlık...")
-    else:
-        print("Ölüm nedeni: Susuzluk...")
-        
-    print("\nOyun bitti. Tekrar oynamak için scripti yeniden çalıştır.")
-    input("\nÇıkmak için Enter'a bas...")
+const recipes=[
+ {id:"axe",name:"Taş Balta",desc:"Ağaç kesmek için.",cost:{wood:3,stone:2},give:1},
+ {id:"fire",name:"Kamp Ateşi",desc:"Gece ısınmak için.",cost:{wood:4,stone:2},give:1},
+ {id:"foundation",name:"Temel",desc:"Barınağın zemini.",cost:{wood:6,stone:2},give:1},
+ {id:"wall",name:"Duvar",desc:"Barınağın duvarı.",cost:{wood:4},give:1},
+ {id:"door",name:"Kapı",desc:"Barınağın kapısı.",cost:{wood:3},give:1},
+ {id:"roof",name:"Çatı",desc:"Barınağın çatısı.",cost:{wood:5},give:1}
+];
 
+function showMsg(t,sec=3){const e=document.getElementById('message');e.textContent=t;e.style.opacity=1;messageTimer=sec;}
+function updateUI(){
+  for(const [id,val] of [['health',player.health],['hunger',player.hunger],['thirst',player.thirst],['warmth',player.warmth]])document.getElementById(id).style.width=clamp(val,0,100)+'%';
+  for(const [id,val] of [['wood',player.wood],['stone',player.stone],['fiber',player.fiber],['food',player.food],['water',player.water],['fuel',player.fuel]])document.getElementById(id).textContent=val;
+  document.getElementById('bs1').innerHTML='1<br>Temel ×'+player.build.foundation;
+  document.getElementById('bs2').innerHTML='2<br>Duvar ×'+player.build.wall;
+  document.getElementById('bs3').innerHTML='3<br>Kapı ×'+player.build.door;
+  document.getElementById('bs4').innerHTML='4<br>Çatı ×'+player.build.roof;
+}
+function canAfford(r){return Object.entries(r.cost).every(([k,v])=>player[k]>=v);}
+function spend(r){for(const [k,v] of Object.entries(r.cost))player[k]-=v;}
+function renderRecipes(){
+  const root=document.getElementById('recipes');root.innerHTML='';
+  for(const r of recipes){
+    const d=document.createElement('div');d.className='recipe';
+    const c=Object.entries(r.cost).map(([k,v])=>`${k} ${v}`).join(' · ');
+    d.innerHTML=`<b>${r.name}</b><span>${r.desc}<br>Maliyet: ${c}</span><button ${canAfford(r)?'':'disabled'} data-id="${r.id}">CRAFT</button>`;
+    d.querySelector('button').onclick=()=>craft(r.id);
+    root.appendChild(d);
+  }
+}
+function craft(id){
+  const r=recipes.find(x=>x.id===id);if(!r)return;
+  if(!canAfford(r)){showMsg('Kaynak yetmiyor.');return;}
+  spend(r);
+  if(id==='axe')player.axe=true;
+  else if(id==='fire'){player.campfire=true;fireWorld.x=player.x;fireWorld.z=player.z;showMsg('Kamp ateşini burada kurdun.');}
+  else player.build[id]++;
+  showMsg(`${r.name} üretildi.`);
+  renderRecipes();updateUI();
+}
+function setCraft(open){
+  craftOpen=open;document.getElementById('craft').style.display=open?'block':'none';
+  if(open){renderRecipes();document.exitPointerLock?.();}
+}
+document.getElementById('closeCraft').onclick=()=>setCraft(false);
 
-if __name__ == "__main__":
-    main()
+const keys={}; addEventListener('keydown',e=>{
+  keys[e.key.toLowerCase()]=true;
+  if(e.key.toLowerCase()==='c' && started){setCraft(!craftOpen);return;}
+  if(e.key.toLowerCase()==='b' && started){buildMode=!buildMode;document.getElementById('buildbar').style.display=buildMode?'block':'none';return;}
+  if(['1','2','3','4'].includes(e.key) && buildMode){buildType=+e.key;for(let i=1;i<=4;i++)document.getElementById('bs'+i).classList.toggle('active',i===buildType);return;}
+  if(e.key.toLowerCase()==='q')eat();
+  if(e.key.toLowerCase()==='g')drink();
+  if(e.key.toLowerCase()==='r')refuel();
+});
+addEventListener('keyup',e=>keys[e.key.toLowerCase()]=false);
+
+let mouseLocked=false;
+canvas.addEventListener('click',()=>{
+  if(!started||craftOpen)return;
+  if(buildMode){placeBuild();return;}
+  canvas.requestPointerLock?.();
+});
+document.addEventListener('pointerlockchange',()=>mouseLocked=document.pointerLockElement===canvas);
+document.addEventListener('mousemove',e=>{
+  if(!mouseLocked||craftOpen)return;
+  player.yaw-=e.movementX*0.0022; player.pitch-=e.movementY*0.0022;player.pitch=clamp(player.pitch,-1.25,1.25);
+});
+
+function forward(){return [Math.sin(player.yaw),-0.0,-Math.cos(player.yaw)];}
+function nearTree(){
+  let best=null,bd=2.3;
+  for(const t of world.trees)if(t.alive){const dx=t.x-player.x,dz=t.z-player.z,d=Math.hypot(dx,dz);if(d<bd){bd=d;best=t;}}
+  return best;
+}
+function nearCar(){return Math.hypot(car.x-player.x,car.z-player.z)<3.2;}
+function interact(){
+  const t=nearTree();
+  if(t){
+    if(!player.axe){showMsg('Önce C ile taş balta craftla.');return;}
+    t.hits++;
+    if(t.hits>=3){t.alive=false;player.wood+=6;player.fiber+=2;showMsg('Ağaç devrildi: +6 odun, +2 lif.');}
+    else showMsg('Baltayı vurdun. '+t.hits+'/3');
+    updateUI();return;
+  }
+  let bestB=null,bd=2.0;for(const b of world.berries)if(!b.taken){const d=Math.hypot(b.x-player.x,b.z-player.z);if(d<bd){bd=d;bestB=b;}}
+  if(bestB){bestB.taken=true;player.food++;showMsg('Yabani meyve topladın: +1 yiyecek.');updateUI();return;}
+  if(nearCar()){if(player.fuel<=0)showMsg('Yakıt yok. Haritada sarı bidonu bul.');else refuel();return;}
+}
+addEventListener('keydown',e=>{if(e.key.toLowerCase()==='e'&&!e.repeat)interact();});
+
+const fuelCan={x:4,z:-1,collected:false};
+function refuel(){
+  if(!nearCar()){showMsg('Arabaya yaklaş.');return;}
+  if(player.fuel<=0){showMsg('Yakıtın yok.');return;}
+  const add=Math.min(player.fuel,55-car.fuel);if(add<=0){showMsg('Depo dolu.');return;}
+  player.fuel-=add;car.fuel+=add;
+  showMsg('Arabaya '+add+'L yakıt koydun.');
+  if(car.fuel>=55)showMsg('Araba artık çalışabilecek kadar yakıtlı!');
+  updateUI();
+}
+function pickupFuel(){
+  if(fuelCan.collected||Math.hypot(fuelCan.x-player.x,fuelCan.z-player.z)>2.4)return;
+  fuelCan.collected=true;player.fuel+=25;showMsg('Benzin bidonu aldın: +25L.');
+  updateUI();
+}
+addEventListener('keydown',e=>{if(e.key.toLowerCase()==='e'&&!e.repeat)pickupFuel();});
+
+function eat(){if(player.food<=0){showMsg('Yiyecek yok.');return;}player.food--;player.hunger=clamp(player.hunger+28,0,100);showMsg('Yemek yedin.');updateUI();}
+function drink(){if(player.water<=0){showMsg('Su yok.');return;}player.water--;player.thirst=clamp(player.thirst+32,0,100);showMsg('Su içtin.');updateUI();}
+
+function placeBuild(){
+  let key=['foundation','wall','door','roof'][buildType-1];
+  if(player.build[key]<=0){showMsg('Bu yapı parçası yok. C ile craftla.');return;}
+  const f=forward(), dist=5.2;
+  const x=Math.round((player.x+f[0]*dist)/2)*2, z=Math.round((player.z+f[2]*dist)/2)*2;
+  world.builds.push({type:key,x,z,yaw:Math.round(player.yaw/(Math.PI/2))*(Math.PI/2)});
+  player.build[key]--;showMsg(key==='foundation'?'Temel yerleştirildi.':'Yapı parçası yerleştirildi.');updateUI();
+}
+
+function update(dt){
+  if(!started||paused||craftOpen)return;
+
+  if(keys.w)move(1,dt); if(keys.s)move(-1,dt);
+  if(keys.a)strafe(-1,dt); if(keys.d)strafe(1,dt);
+
+  clock += dt*0.18; if(clock>=24){clock-=24;day++;showMsg('Yeni gün başladı.');}
+  const night=clock<6.2||clock>20.0;
+  player.hunger=Math.max(0,player.hunger-dt*0.38);
+  player.thirst=Math.max(0,player.thirst-dt*0.66);
+  const nearFire=player.campfire&&Math.hypot(0-player.x,0-player.z)<3; // replaced by actual fire below
+  player.warmth += ((night?38:78)-player.warmth)*dt*0.18;
+  const fireNear=player.campfire && Math.hypot(player.x-fireWorld.x,player.z-fireWorld.z)<4.5;
+  if(fireNear)player.warmth=Math.min(100,player.warmth+dt*9);
+  if(player.warmth<12)player.health-=dt*1.9;
+  if(player.hunger<8)player.health-=dt*1.0;
+  if(player.thirst<8)player.health-=dt*2.0;
+
+  pickupFuel();
+  const dead=player.health<=0;
+  if(dead){started=false;document.getElementById('dead').style.display='flex';document.getElementById('deadReason').textContent=player.thirst<8?'Susuz kaldın.':player.warmth<10?'Soğuktan öldün.':'Gücün tükendi.';}
+  if(messageTimer>0){messageTimer-=dt;if(messageTimer<=0)document.getElementById('message').style.opacity=0;}
+  updateUI();
+}
+function move(dir,dt){
+  const f=forward(),spd=4.5*dt*dir;player.x+=f[0]*spd;player.z+=f[2]*spd;bound();
+}
+function strafe(dir,dt){
+  const f=forward(),spd=4.5*dt*dir;player.x+=(-f[2])*spd;player.z+=(f[0])*spd;bound();
+}
+function bound(){player.x=clamp(player.x,-48,48);player.z=clamp(player.z,-48,48);}
+
+const fireWorld={x:0,z:0};
+
+function render(){
+  gl.enable(gl.DEPTH_TEST);gl.clearColor(0.08,0.15,0.11,1);gl.clear(gl.COLOR_BUFFER_BIT|gl.DEPTH_BUFFER_BIT);
+  const aspect=canvas.width/canvas.height;
+  const P=mat4Perspective(Math.PI/3,aspect,.08,140);
+  const eye=[player.x,player.y,player.z], dir=[Math.sin(player.yaw)*Math.cos(player.pitch),Math.sin(player.pitch),-Math.cos(player.yaw)*Math.cos(player.pitch)];
+  const V=lookAt(eye,[eye[0]+dir[0],eye[1]+dir[1],eye[2]+dir[2]],[0,1,0]);
+  const VP=mat4Mul(P,V);
+  gl.uniform3f(uLight,-0.35,0.9,0.25);
+
+  // ground
+  drawColored(CUBE,mat4Scale(100,0.15,100),colorByType.ground);
+
+  // trees
+  for(const t of world.trees)if(t.alive){
+    drawColored(CYL,mat4Mul(mat4Translate(t.x,1.4,t.z),mat4Scale(.42,2.8,.42)),colorByType.trunk);
+    drawColored(CONE,mat4Mul(mat4Translate(t.x,3.0,t.z),mat4Scale(1.7,2.4,1.7)),colorByType.leaf);
+  }
+  // stumps
+  for(const t of world.trees)if(!t.alive)drawColored(CYL,mat4Mul(mat4Translate(t.x,.35,t.z),mat4Scale(.55,.7,.55)),colorByType.trunk);
+
+  for(const r of world.rocks)drawColored(CUBE,mat4Mul(mat4Translate(r.x,.35,r.z),mat4Scale(.7,.5,.7)),colorByType.rock);
+
+  // berries
+  for(const b of world.berries)if(!b.taken)drawColored(CUBE,mat4Mul(mat4Translate(b.x,.28,b.z),mat4Scale(.18,.3,.18)),[0.45,0.05,0.13]);
+
+  // car
+  drawColored(CUBE,mat4Mul(mat4Translate(car.x,.7,car.z),mat4Scale(2.0,.55,3.3)),colorByType.car);
+  drawColored(CUBE,mat4Mul(mat4Translate(car.x,1.18,car.z-.2),mat4Scale(1.5,.45,1.8)),colorByType.glass);
+  for(const sx of [-1,1])for(const sz of [-1,1])drawColored(CYL,mat4Mul(mat4Translate(car.x+sx*1.8,.38,car.z+sz*2.5),mat4Scale(.42,.42,.42)),[0.02,0.02,0.02]);
+
+  // fuel can
+  if(!fuelCan.collected)drawColored(CUBE,mat4Mul(mat4Translate(fuelCan.x,.55,fuelCan.z),mat4Scale(.45,.7,.45)),[0.83,0.63,0.12]);
+
+  // fire
+  if(player.campfire){
+    drawColored(CUBE,mat4Mul(mat4Translate(fireWorld.x,.25,fireWorld.z),mat4Scale(1.0,.18,1.0)),colorByType.rock);
+    drawColored(CONE,mat4Mul(mat4Translate(fireWorld.x,.8,fireWorld.z),mat4Scale(.55,1.1,.55)),colorByType.fire);
+  }
+
+  // builds
+  for(const b of world.builds){
+    if(b.type==='foundation')drawColored(CUBE,mat4Mul(mat4Translate(b.x,.22,b.z),mat4Scale(2.0,.22,2.0)),colorByType.wood);
+    if(b.type==='wall')drawColored(CUBE,mat4Mul(mat4Translate(b.x,1.5,b.z),mat4Mul(mat4RotY(b.yaw),mat4Scale(2.0,1.5,.18))),colorByType.wood);
+    if(b.type==='door')drawColored(CUBE,mat4Mul(mat4Translate(b.x,1.5,b.z),mat4Mul(mat4RotY(b.yaw),mat4Scale(.8,1.5,.18))),colorByType.roof);
+    if(b.type==='roof')drawColored(CUBE,mat4Mul(mat4Translate(b.x,3.15,b.z),mat4Mul(mat4RotY(b.yaw),mat4Scale(2.1,.18,2.1))),colorByType.roof);
+  }
+
+  // Player/camera is first person; no body rendered.
+  gl.uniformMatrix4fv(uMVP,false,new Float32Array(VP));
+  // render all again with MVP uniform; previous code uses uModel only, so attach VP per draw via helper.
+}
+function drawFrame(){
+  // Re-render with correct MVP by monkey patching drawColored to apply VP in the wrapper.
+}
+
+/* Corrected render pipeline: same geometry calls, but sets MVP before every draw. */
+function render3D(){
+  gl.enable(gl.DEPTH_TEST);
+  gl.clearColor(0.055,0.105,0.075,1);
+  gl.clear(gl.COLOR_BUFFER_BIT|gl.DEPTH_BUFFER_BIT);
+  const aspect=canvas.width/canvas.height, P=mat4Perspective(Math.PI/3,aspect,.08,140);
+  const eye=[player.x,player.y,player.z], dir=[Math.sin(player.yaw)*Math.cos(player.pitch),Math.sin(player.pitch),-Math.cos(player.yaw)*Math.cos(player.pitch)];
+  const V=lookAt(eye,[eye[0]+dir[0],eye[1]+dir[1],eye[2]+dir[2]],[0,1,0]), VP=mat4Mul(P,V);
+  gl.uniform3f(uLight,-0.35,0.9,0.25);
+
+  function D(m,mdl,col){ gl.uniformMatrix4fv(uMVP,false,new Float32Array(VP)); drawColored(m,mdl,col); }
+
+  D(CUBE,mat4Scale(100,.15,100),colorByType.ground);
+  for(const t of world.trees)if(t.alive){
+    D(CYL,mat4Mul(mat4Translate(t.x,1.4,t.z),mat4Scale(.42,2.8,.42)),colorByType.trunk);
+    D(CONE,mat4Mul(mat4Translate(t.x,3.0,t.z),mat4Scale(1.7,2.4,1.7)),colorByType.leaf);
+  }
+  for(const t of world.trees)if(!t.alive)D(CYL,mat4Mul(mat4Translate(t.x,.35,t.z),mat4Scale(.55,.7,.55)),colorByType.trunk);
+  for(const r of world.rocks)D(CUBE,mat4Mul(mat4Translate(r.x,.35,r.z),mat4Scale(.7,.5,.7)),colorByType.rock);
+  for(const b of world.berries)if(!b.taken)D(CUBE,mat4Mul(mat4Translate(b.x,.28,b.z),mat4Scale(.18,.3,.18)),[0.45,0.05,0.13]);
+
+  D(CUBE,mat4Mul(mat4Translate(car.x,.7,car.z),mat4Scale(2.0,.55,3.3)),colorByType.car);
+  D(CUBE,mat4Mul(mat4Translate(car.x,1.18,car.z-.2),mat4Scale(1.5,.45,1.8)),colorByType.glass);
+  for(const sx of [-1,1])for(const sz of [-1,1])D(CYL,mat4Mul(mat4Translate(car.x+sx*1.8,.38,car.z+sz*2.5),mat4Scale(.42,.42,.42)),[0.02,0.02,0.02]);
+  if(!fuelCan.collected)D(CUBE,mat4Mul(mat4Translate(fuelCan.x,.55,fuelCan.z),mat4Scale(.45,.7,.45)),[0.83,0.63,0.12]);
+
+  if(player.campfire){
+    D(CUBE,mat4Mul(mat4Translate(fireWorld.x,.25,fireWorld.z),mat4Scale(1.0,.18,1.0)),colorByType.rock);
+    D(CONE,mat4Mul(mat4Translate(fireWorld.x,.8,fireWorld.z),mat4Scale(.55,1.1,.55)),colorByType.fire);
+  }
+  for(const b of world.builds){
+    if(b.type==='foundation')D(CUBE,mat4Mul(mat4Translate(b.x,.22,b.z),mat4Scale(2.0,.22,2.0)),colorByType.wood);
+    if(b.type==='wall')D(CUBE,mat4Mul(mat4Translate(b.x,1.5,b.z),mat4Mul(mat4RotY(b.yaw),mat4Scale(2.0,1.5,.18))),colorByType.wood);
+    if(b.type==='door')D(CUBE,mat4Mul(mat4Translate(b.x,1.5,b.z),mat4Mul(mat4RotY(b.yaw),mat4Scale(.8,1.5,.18))),colorByType.roof);
+    if(b.type==='roof')D(CUBE,mat4Mul(mat4Translate(b.x,3.15,b.z),mat4Mul(mat4RotY(b.yaw),mat4Scale(2.1,.18,2.1))),colorByType.roof);
+  }
+
+  const night=clock<6.2||clock>20;
+  document.getElementById('title').textContent=`STRANDED: WILDERNESS · GÜN ${day} · ${String(Math.floor(clock)).padStart(2,'0')}:${String(Math.floor((clock%1)*60)).padStart(2,'0')}`;
+  const prompt=document.getElementById('prompt');
+  let p='';
+  const t=nearTree(); if(t)p=player.axe?'E · AĞACI KES':'C · BALTA CRAFTLA';
+  if(!t&&!fuelCan.collected&&Math.hypot(fuelCan.x-player.x,fuelCan.z-player.z)<3)p='E · BENZİN AL';
+  if(!t&&nearCar())p='R · ARABAYA YAKIT';
+  prompt.textContent=p;prompt.style.display=p?'block':'none';
+}
+function loop(now){
+  const dt=Math.min(.033,(now-last)/1000);last=now;
+  update(dt);render3D();requestAnimationFrame(loop);
+}
+document.getElementById('startBtn').onclick=()=>{
+  document.getElementById('start').style.display='none';started=true;canvas.requestPointerLock?.();showMsg('Önce C ile taş balta craftla.',4);
+};
+updateUI();requestAnimationFrame(loop);
+</script>
+</body>
+</html>
