@@ -9,10 +9,10 @@
     <style>
         :root {
             --bg-dark: #070913;
-            --card-bg: rgba(18, 24, 41, 0.75);
-            --border-color: rgba(56, 189, 248, 0.2);
+            --card-bg: rgba(18, 24, 41, 0.8);
+            --border-color: rgba(56, 189, 248, 0.25);
             --user-gradient: linear-gradient(135deg, #2563eb, #1d4ed8);
-            --bot-bg: rgba(30, 41, 59, 0.7);
+            --bot-bg: rgba(30, 41, 59, 0.75);
             --accent: #38bdf8;
             --accent-glow: rgba(56, 189, 248, 0.35);
             --text-main: #f8fafc;
@@ -34,11 +34,11 @@
             position: relative;
         }
 
-        /* Hareketli ve Işıltılı Arka Plan Efektleri */
+        /* Arka Plan Efektleri */
         .bg-glow-1, .bg-glow-2 {
             position: absolute;
-            width: 350px;
-            height: 350px;
+            width: 380px;
+            height: 380px;
             border-radius: 50%;
             filter: blur(120px);
             z-index: 0;
@@ -46,25 +46,15 @@
             animation: floatGlow 10s infinite alternate ease-in-out;
         }
 
-        .bg-glow-1 {
-            background: #38bdf8;
-            top: 10%;
-            left: 15%;
-        }
-
-        .bg-glow-2 {
-            background: #7c3aed;
-            bottom: 10%;
-            right: 15%;
-            animation-delay: -5s;
-        }
+        .bg-glow-1 { background: #38bdf8; top: 8%; left: 12%; }
+        .bg-glow-2 { background: #7c3aed; bottom: 8%; right: 12%; animation-delay: -5s; }
 
         @keyframes floatGlow {
             0% { transform: translate(0, 0) scale(1); }
             100% { transform: translate(40px, 50px) scale(1.2); }
         }
 
-        /* Ana Kart / Cam Efekti */
+        /* Ana Gövde / Cam Efekti */
         .chat-wrapper {
             position: relative;
             z-index: 10;
@@ -85,18 +75,14 @@
         /* Header */
         .chat-header {
             padding: 20px 28px;
-            background: rgba(15, 23, 42, 0.8);
+            background: rgba(15, 23, 42, 0.85);
             border-bottom: 1px solid var(--border-color);
             display: flex;
             justify-content: space-between;
             align-items: center;
         }
 
-        .bot-info {
-            display: flex;
-            align-items: center;
-            gap: 15px;
-        }
+        .bot-info { display: flex; align-items: center; gap: 15px; }
 
         .avatar {
             width: 48px;
@@ -112,7 +98,7 @@
         }
 
         .bot-details h2 { font-size: 20px; font-weight: 700; color: #fff; letter-spacing: 0.5px; }
-        .status { font-size: 13px; color: #34d399; display: flex; align-items: center; gap: 6px; font-weight: 400; }
+        .status { font-size: 13px; color: #34d399; display: flex; align-items: center; gap: 6px; }
         .status-dot { width: 9px; height: 9px; background-color: #34d399; border-radius: 50%; box-shadow: 0 0 8px #34d399; }
 
         .header-actions button {
@@ -126,6 +112,7 @@
             font-weight: 600;
             transition: all 0.3s ease;
         }
+
         .header-actions button:hover { 
             background: rgba(239, 68, 68, 0.2); 
             border-color: rgba(239, 68, 68, 0.4);
@@ -215,6 +202,7 @@
             white-space: nowrap;
             transition: all 0.2s ease;
         }
+
         .chip:hover { 
             border-color: var(--accent); 
             color: var(--accent); 
@@ -278,12 +266,10 @@
 </head>
 <body>
 
-    <!-- Arka Plan Işıkları -->
     <div class="bg-glow-1"></div>
     <div class="bg-glow-2"></div>
 
     <div class="chat-wrapper">
-        <!-- Header -->
         <div class="chat-header">
             <div class="bot-info">
                 <div class="avatar"><i class="fa-solid fa-sparkles"></i></div>
@@ -297,7 +283,6 @@
             </div>
         </div>
 
-        <!-- Sohbet Alanı -->
         <div id="chat-box">
             <div class="msg-row bot-row">
                 <div class="msg-icon"><i class="fa-solid fa-robot"></i></div>
@@ -305,14 +290,12 @@
             </div>
         </div>
 
-        <!-- Öneri Butonları -->
         <div class="chips-container">
-            <div class="chip" onclick="sendQuickMsg('Bana ilginç ve bilinmeyen bir bilgi ver!')">💡 İlginç Bir Bilgi</div>
+            <div class="chip" onclick="sendQuickMsg('Bana ilginç ve bilinmeyen bir bilgi ver!')">💡 İlginç Bilgi</div>
             <div class="chip" onclick="sendQuickMsg('Komik bir espri yapabilir misin?')">😂 Espri Yap</div>
-            <div class="chip" onclick="sendQuickMsg('Bana HTML/CSS ile güzel bir buton kodu yaz')">💻 Kod Örneği</div>
+            <div class="chip" onclick="sendQuickMsg('Bana harika bir oyun önerisi ver!')">🎮 Oyun Önerisi</div>
         </div>
 
-        <!-- Mesaj Yazma Alanı -->
         <div id="input-container">
             <input type="text" id="user-input" placeholder="Bir şeyler yaz..." onkeydown="if(event.key==='Enter') sendMessage()">
             <button class="send-btn" onclick="sendMessage()"><i class="fa-solid fa-paper-plane"></i></button>
@@ -320,14 +303,15 @@
     </div>
 
     <script>
-        // ===============================================================
-        //  API ANAHTARINI BURAYA EKLİYORSUN:
-        //  Google AI Studio'dan aldığın anahtarı (örn: AIzaSyD1234567890abcdef)
-        //  ortadan ikiye bölüp ilk yarısını part1'e, kalanını part2'ye yaz!
-        // ===============================================================
-        
-        const part1 = "AIzaSy_BURAYA_İLK_YARIYI_YAZ_"; 
-        const part2 = "BURAYA_İKİNCİ_YARIYI_YAZ";
+        // =========================================================
+        // KENDİ GOOGLE API ANAHTARINI BURAYA BÖLEREK YAZIYORSUN:
+        // Örnek Anahtar: AIzaSyD1234567890abcdefgh
+        // part1 = "AIzaSyD1234567890"
+        // part2 = "abcdefgh"
+        // =========================================================
+
+        const part1 = "AIzaSy_ILK_YARI_BURAYA"; 
+        const part2 = "IKINCI_YARI_BURAYA";
         
         const API_KEY = part1 + part2;
         
@@ -363,12 +347,11 @@
             input.value = '';
             chatBox.scrollTop = chatBox.scrollHeight;
 
-            // Eğer varsayılan uyarı yazısı değiştirilmediyse uyarı ver
-            if (part1.includes("BURAYA_İLK_YARIYI_YAZ")) {
+            if (part1.includes("ILK_YARI_BURAYA") || !API_KEY) {
                 chatBox.innerHTML += `
                     <div class="msg-row bot-row">
                         <div class="msg-icon"><i class="fa-solid fa-triangle-exclamation"></i></div>
-                        <div class="msg-bubble">⚠️ <b>API Anahtarı Eksik!</b><br>Lütfen <code>index.html</code> dosyasını açıp <b>part1</b> ve <b>part2</b> kısımlarına kendi Google API anahtarını yapıştır.</div>
+                        <div class="msg-bubble">⚠️ <b>API Anahtarı Eksik!</b><br>Lütfen koddaki <b>part1</b> ve <b>part2</b> alanlarına kendi Google API anahtarını yapıştır.</div>
                     </div>`;
                 chatBox.scrollTop = chatBox.scrollHeight;
                 return;
@@ -390,7 +373,7 @@
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
                         system_instruction: {
-                            parts: [{ text: "Sen her konuda uzman, çok yetenekli, yardımsever, Türkçe konuşan modern bir yapay zekasın." }]
+                            parts: [{ text: "Sen her konuda uzman, eğlenceli, samimi ve yardımsever Türkçe konuşan bir yapay zekasın." }]
                         },
                         contents: chatHistory
                     })
