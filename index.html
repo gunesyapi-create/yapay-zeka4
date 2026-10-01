@@ -300,6 +300,9 @@
     </div>
 
     <script>
+        // Google AI Studio'dan aldığın "AIzaSy..." ile başlayan API anahtarını buraya koy:
+        const API_KEY = "BURAYA_AIzaSy_ILE_BASLAYAN_KEYI_YAZIN";
+
         let chatHistory = [];
 
         function sendQuick(text) {
@@ -332,6 +335,17 @@
             input.value = '';
             chatBox.scrollTop = chatBox.scrollHeight;
 
+            // API Key kontrolü
+            if (!API_KEY || !API_KEY.startsWith("AIzaSy")) {
+                chatBox.innerHTML += `
+                    <div class="msg-row bot-row">
+                        <div class="msg-avatar"><i class="fa-solid fa-triangle-exclamation"></i></div>
+                        <div class="msg-content">⚠️ <b>Geçersiz veya Eksik API Anahtarı!</b><br>Koddaki <code>const API_KEY = "..."</code> kısmına <b>AIzaSy</b> ile başlayan Google Gemini API anahtarını yazmalısın.</div>
+                    </div>`;
+                chatBox.scrollTop = chatBox.scrollHeight;
+                return;
+            }
+
             const loadingId = 'loading-' + Date.now();
             chatBox.innerHTML += `
                 <div class="msg-row bot-row" id="${loadingId}">
@@ -340,50 +354,55 @@
                 </div>`;
             chatBox.scrollTop = chatBox.scrollHeight;
 
-            chatHistory.push({ role: "user", content: message });
+            chatHistory.push({ role: "user", parts: [{ text: message }] });
 
             try {
-                const response = await fetch('https://text.pollinations.ai/', {
+                const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${API_KEY}`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
-                        messages: [
-                            { role: "system", content: "Sen her konuda uzman, son derece samimi, eğlenceli ve yardımsever bir yapay zeka asistanısın. İsmin Güneş AI." },
-                            ...chatHistory
-                        ]
+                        system_instruction: {
+                            parts: [{ text: "Sen Güneş AI adında samimi, eğlenceli ve yardımsever bir yapay zeka asistanısın. Türkçe yanıt ver." }]
+                        },
+                        contents: chatHistory
                     })
                 });
 
-                const botReply = await response.text();
-                const loadingElement = document.getElementById(loadingId);
-                if (loadingElement) loadingElement.remove();
+                const data = await response.json();
 
-                if (botReply && botReply.trim() !== "") {
+                if (data.candidates && data.candidates[0] && data.candidates[0].content && data.candidates[0].content.parts[0].text) {
+                    const botReply = data.candidates[0].content.parts[0].text;
                     chatBox.innerHTML += `
                         <div class="msg-row bot-row">
                             <div class="msg-avatar"><i class="fa-solid fa-robot"></i></div>
                             <div class="msg-content">${formatReply(botReply)}</div>
                         </div>`;
-                    chatHistory.push({ role: "assistant", content: botReply });
+                    chatHistory.push({ role: "model", parts: [{ text: botReply }] });
+                } else if (data.error) {
+                    chatBox.innerHTML += `
+                        <div class="msg-row bot-row">
+                            <div class="msg-avatar"><i class="fa-solid fa-circle-exclamation"></i></div>
+                            <div class="msg-content"><b>Google API Hatası:</b> ${escapeHtml(data.error.message || 'Geçersiz API Anahtarı.')}</div>
+                        </div>`;
                 } else {
                     chatBox.innerHTML += `
                         <div class="msg-row bot-row">
                             <div class="msg-avatar"><i class="fa-solid fa-circle-exclamation"></i></div>
-                            <div class="msg-content">Şu an yanıt alınamadı, lütfen tekrar dene.</div>
+                            <div class="msg-content">Yanıt alınamadı. API anahtarını kontrol et.</div>
                         </div>`;
                 }
 
             } catch (err) {
-                const loadingElement = document.getElementById(loadingId);
-                if (loadingElement) loadingElement.remove();
-                
                 chatBox.innerHTML += `
                     <div class="msg-row bot-row">
                         <div class="msg-avatar"><i class="fa-solid fa-circle-xmark"></i></div>
-                        <div class="msg-content">Bağlantı hatası oluştu! İnternet bağlantını kontrol et.</div>
+                        <div class="msg-content">Bağlantı hatası oluştu! İnternet bağlantını veya API anahtarını kontrol et.</div>
                     </div>`;
+            } finally {
+                const loadingElement = document.getElementById(loadingId);
+                if (loadingElement) loadingElement.remove();
+                chatBox.scrollTop = chatBox.scrollHeight;
             }
-            chatBox.scrollTop = chatBox.scrollHeight;
         }
 
         function escapeHtml(text) {
