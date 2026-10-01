@@ -252,32 +252,6 @@
 
         button.send-btn:hover { transform: translateY(-1px); }
 
-        .modal-overlay {
-            position: fixed;
-            top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0, 0, 0, 0.75);
-            backdrop-filter: blur(8px);
-            z-index: 100;
-            display: none;
-            justify-content: center;
-            align-items: center;
-        }
-
-        .modal-card {
-            background: #111827;
-            border: 1px solid var(--card-border);
-            border-radius: 20px;
-            padding: 24px;
-            max-width: 420px;
-            width: 90%;
-            box-shadow: 0 20px 40px rgba(0,0,0,0.8);
-        }
-
-        .modal-card h3 { margin-bottom: 10px; color: #fff; display: flex; align-items: center; gap: 8px; font-size: 18px; }
-        .modal-card p { font-size: 13px; color: var(--text-muted); margin-bottom: 16px; line-height: 1.5; }
-        .modal-card input { width: 100%; margin-bottom: 16px; }
-        .modal-actions { display: flex; justify-content: flex-end; gap: 8px; }
-
         ::-webkit-scrollbar { width: 6px; }
         ::-webkit-scrollbar-thumb { background: rgba(255, 255, 255, 0.15); border-radius: 10px; }
     </style>
@@ -299,7 +273,6 @@
                 </div>
             </div>
             <div class="header-btns">
-                <button class="icon-btn" onclick="openSettings()"><i class="fa-solid fa-gear"></i> Ayarlar</button>
                 <button class="icon-btn" onclick="clearChat()"><i class="fa-solid fa-rotate-right"></i> Temizle</button>
             </div>
         </div>
@@ -326,48 +299,11 @@
         </div>
     </div>
 
-    <!-- Ayarlar Modalı -->
-    <div class="modal-overlay" id="settings-modal">
-        <div class="modal-card">
-            <h3><i class="fa-solid fa-key" style="color: var(--accent-cyan);"></i> API Anahtarı Ayarı</h3>
-            <p>Google AI Studio'dan aldığın API anahtarını güncelleyebilir veya değiştirebilirsin.</p>
-            <input type="text" id="api-key-input" placeholder="AIzaSy...">
-            <div class="modal-actions">
-                <button class="icon-btn" onclick="closeSettings()">İptal</button>
-                <button class="send-btn" style="padding: 8px 16px;" onclick="saveApiKey()">Kaydet</button>
-            </div>
-        </div>
-    </div>
-
     <script>
-        // Verdiğin API anahtarı eklendi:
-        const HARDCODED_KEY = "AQ.Ab8RN6KT9dzOcBXjWE-28Cz4JKM7Ij0HaXBUgZREQ0Hd3mhsVQ";
-
-        function getApiKey() {
-            return localStorage.getItem('GUNES_AI_KEY') || HARDCODED_KEY;
-        }
+        // Google AI Studio'dan aldığın "AIzaSy..." ile başlayan API anahtarını yapıştır:
+        const API_KEY = "BURAYA_API_KEYINIZI_YAZIN";
 
         let chatHistory = [];
-
-        function openSettings() {
-            document.getElementById('api-key-input').value = getApiKey();
-            document.getElementById('settings-modal').style.display = 'flex';
-        }
-
-        function closeSettings() {
-            document.getElementById('settings-modal').style.display = 'none';
-        }
-
-        function saveApiKey() {
-            const key = document.getElementById('api-key-input').value.trim();
-            if (key) {
-                localStorage.setItem('GUNES_AI_KEY', key);
-                alert("API Anahtarı başarıyla kaydedildi!");
-            } else {
-                localStorage.removeItem('GUNES_AI_KEY');
-            }
-            closeSettings();
-        }
 
         function sendQuick(text) {
             document.getElementById('user-input').value = text;
@@ -388,7 +324,6 @@
             const message = input.value.trim();
             if (!message) return;
 
-            const apiKey = getApiKey();
             const chatBox = document.getElementById('chat-box');
 
             chatBox.innerHTML += `
@@ -400,14 +335,13 @@
             input.value = '';
             chatBox.scrollTop = chatBox.scrollHeight;
 
-            if (!apiKey || apiKey.length < 10) {
+            if (!API_KEY || API_KEY.includes("BURAYA_API_KEY") || API_KEY.length < 10) {
                 chatBox.innerHTML += `
                     <div class="msg-row bot-row">
                         <div class="msg-avatar"><i class="fa-solid fa-triangle-exclamation"></i></div>
-                        <div class="msg-content">⚠️ <b>API Anahtarı Eksik!</b><br>Lütfen sağ üstteki <b>⚙️ Ayarlar</b> butonuna tıklayıp geçerli bir Google API anahtarı kaydedin.</div>
+                        <div class="msg-content">⚠️ <b>API Anahtarı Eksik!</b><br>Lütfen koddaki <code>const API_KEY = "..."</code> kısmına geçerli Google API anahtarını yapıştırın.</div>
                     </div>`;
                 chatBox.scrollTop = chatBox.scrollHeight;
-                openSettings();
                 return;
             }
 
@@ -422,7 +356,7 @@
             chatHistory.push({ role: "user", parts: [{ text: message }] });
 
             try {
-                const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`, {
+                const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${API_KEY}`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
@@ -449,7 +383,7 @@
                     chatBox.innerHTML += `
                         <div class="msg-row bot-row">
                             <div class="msg-avatar"><i class="fa-solid fa-circle-exclamation"></i></div>
-                            <div class="msg-content"><b>API Hatası:</b> ${escapeHtml(data.error.message || 'Geçersiz API Anahtarı.')}<br><br>Sağ üstteki <b>⚙️ Ayarlar</b> butonuna tıklayarak yeni API anahtarını girebilirsin.</div>
+                            <div class="msg-content"><b>API Hatası:</b> ${escapeHtml(data.error.message || 'Geçersiz API Anahtarı.')}</div>
                         </div>`;
                 } else {
                     chatBox.innerHTML += `
