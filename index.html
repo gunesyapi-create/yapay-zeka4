@@ -34,7 +34,6 @@
             position: relative;
         }
 
-        /* Arka Plan Efektleri */
         .bg-glow-1, .bg-glow-2 {
             position: absolute;
             width: 380px;
@@ -54,7 +53,6 @@
             100% { transform: translate(40px, 50px) scale(1.2); }
         }
 
-        /* Ana Gövde / Cam Efekti */
         .chat-wrapper {
             position: relative;
             z-index: 10;
@@ -72,7 +70,6 @@
             overflow: hidden;
         }
 
-        /* Header */
         .chat-header {
             padding: 20px 28px;
             background: rgba(15, 23, 42, 0.85);
@@ -119,7 +116,6 @@
             color: #fca5a5; 
         }
 
-        /* Chat Kutusu */
         #chat-box { 
             flex: 1; 
             padding: 24px; 
@@ -183,7 +179,6 @@
             white-space: pre-wrap;
         }
 
-        /* Hızlı Sorular */
         .chips-container {
             display: flex;
             gap: 10px;
@@ -210,7 +205,6 @@
             transform: translateY(-2px);
         }
 
-        /* Input Alanı */
         #input-container { 
             display: flex; 
             gap: 12px; 
@@ -304,16 +298,10 @@
 
     <script>
         // =========================================================
-        // KENDİ GOOGLE API ANAHTARINI BURAYA BÖLEREK YAZIYORSUN:
-        // Örnek Anahtar: AIzaSyD1234567890abcdefgh
-        // part1 = "AIzaSyD1234567890"
-        // part2 = "abcdefgh"
+        // TEK SEFERDE API ANAHTARINI BURAYA YAPIŞTIR:
         // =========================================================
 
-        const part1 = "AIzaSy_ILK_YARI_BURAYA"; 
-        const part2 = "IKINCI_YARI_BURAYA";
-        
-        const API_KEY = part1 + part2;
+        const API_KEY = "BURAYA_TEK_SEFERDE_API_ANAHTARINI_YAZ";
         
         let chatHistory = [];
 
@@ -347,11 +335,11 @@
             input.value = '';
             chatBox.scrollTop = chatBox.scrollHeight;
 
-            if (part1.includes("ILK_YARI_BURAYA") || !API_KEY) {
+            if (API_KEY.includes("TEK_SEFERDE") || !API_KEY) {
                 chatBox.innerHTML += `
                     <div class="msg-row bot-row">
                         <div class="msg-icon"><i class="fa-solid fa-triangle-exclamation"></i></div>
-                        <div class="msg-bubble">⚠️ <b>API Anahtarı Eksik!</b><br>Lütfen koddaki <b>part1</b> ve <b>part2</b> alanlarına kendi Google API anahtarını yapıştır.</div>
+                        <div class="msg-bubble">⚠️ <b>API Anahtarı Eksik!</b><br>Lütfen koddaki <b>API_KEY</b> tırnaklarının içine kendi Google API anahtarını yapıştır.</div>
                     </div>`;
                 chatBox.scrollTop = chatBox.scrollHeight;
                 return;
