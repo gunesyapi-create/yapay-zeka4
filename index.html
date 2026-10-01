@@ -3,50 +3,90 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Güneş AI - Kişisel Yapay Zeka Asistanı</title>
+    <title>Güneş AI - Yapay Zeka Asistanı</title>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700&display=swap" rel="stylesheet">
     <style>
         :root {
-            --bg-color: #0b0f19;
-            --card-bg: #151c2c;
-            --user-msg: #2563eb;
-            --bot-msg: #1e293b;
+            --bg-dark: #070913;
+            --card-bg: rgba(18, 24, 41, 0.75);
+            --border-color: rgba(56, 189, 248, 0.2);
+            --user-gradient: linear-gradient(135deg, #2563eb, #1d4ed8);
+            --bot-bg: rgba(30, 41, 59, 0.7);
             --accent: #38bdf8;
+            --accent-glow: rgba(56, 189, 248, 0.35);
             --text-main: #f8fafc;
             --text-muted: #94a3b8;
         }
 
         * { box-sizing: border-box; margin: 0; padding: 0; }
-        
+
         body { 
-            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; 
-            background-color: var(--bg-color); 
+            font-family: 'Outfit', sans-serif; 
+            background-color: var(--bg-dark); 
             color: var(--text-main); 
             display: flex; 
             justify-content: center;
             align-items: center;
             height: 100vh; 
             padding: 15px; 
+            overflow: hidden;
+            position: relative;
         }
 
+        /* Hareketli ve Işıltılı Arka Plan Efektleri */
+        .bg-glow-1, .bg-glow-2 {
+            position: absolute;
+            width: 350px;
+            height: 350px;
+            border-radius: 50%;
+            filter: blur(120px);
+            z-index: 0;
+            opacity: 0.5;
+            animation: floatGlow 10s infinite alternate ease-in-out;
+        }
+
+        .bg-glow-1 {
+            background: #38bdf8;
+            top: 10%;
+            left: 15%;
+        }
+
+        .bg-glow-2 {
+            background: #7c3aed;
+            bottom: 10%;
+            right: 15%;
+            animation-delay: -5s;
+        }
+
+        @keyframes floatGlow {
+            0% { transform: translate(0, 0) scale(1); }
+            100% { transform: translate(40px, 50px) scale(1.2); }
+        }
+
+        /* Ana Kart / Cam Efekti */
         .chat-wrapper {
-            max-width: 850px;
+            position: relative;
+            z-index: 10;
+            max-width: 900px;
             width: 100%;
             height: 92vh;
-            background-color: var(--card-bg);
-            border: 1px solid #1e293b;
-            border-radius: 20px;
+            background: var(--card-bg);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid var(--border-color);
+            border-radius: 24px;
             display: flex;
             flex-direction: column;
-            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.5), 0 8px 10px -6px rgba(0, 0, 0, 0.5);
+            box-shadow: 0 0 50px rgba(0, 0, 0, 0.8), 0 0 20px var(--accent-glow);
             overflow: hidden;
         }
 
-        /* Üst Başlık & Profil */
+        /* Header */
         .chat-header {
-            padding: 18px 24px;
-            background: #0f172a;
-            border-bottom: 1px solid #1e293b;
+            padding: 20px 28px;
+            background: rgba(15, 23, 42, 0.8);
+            border-bottom: 1px solid var(--border-color);
             display: flex;
             justify-content: space-between;
             align-items: center;
@@ -55,140 +95,164 @@
         .bot-info {
             display: flex;
             align-items: center;
-            gap: 12px;
+            gap: 15px;
         }
 
         .avatar {
-            width: 42px;
-            height: 42px;
-            border-radius: 50%;
-            background: linear-gradient(135deg, #38bdf8, #3b82f6);
+            width: 48px;
+            height: 48px;
+            border-radius: 16px;
+            background: linear-gradient(135deg, #38bdf8, #818cf8);
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 20px;
+            font-size: 22px;
             color: #fff;
-            box-shadow: 0 0 12px rgba(56, 189, 248, 0.4);
+            box-shadow: 0 0 20px var(--accent-glow);
         }
 
-        .bot-details h2 { font-size: 18px; font-weight: 600; color: #fff; }
-        .status { font-size: 12px; color: #10b981; display: flex; align-items: center; gap: 5px; }
-        .status-dot { width: 8px; height: 8px; background-color: #10b981; border-radius: 50%; display: inline-block; }
+        .bot-details h2 { font-size: 20px; font-weight: 700; color: #fff; letter-spacing: 0.5px; }
+        .status { font-size: 13px; color: #34d399; display: flex; align-items: center; gap: 6px; font-weight: 400; }
+        .status-dot { width: 9px; height: 9px; background-color: #34d399; border-radius: 50%; box-shadow: 0 0 8px #34d399; }
 
         .header-actions button {
-            background: transparent;
-            border: 1px solid #334155;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
             color: var(--text-muted);
-            padding: 8px 12px;
-            border-radius: 8px;
+            padding: 10px 16px;
+            border-radius: 12px;
             cursor: pointer;
-            transition: 0.2s;
+            font-family: inherit;
+            font-weight: 600;
+            transition: all 0.3s ease;
         }
-        .header-actions button:hover { background: #334155; color: #fff; }
+        .header-actions button:hover { 
+            background: rgba(239, 68, 68, 0.2); 
+            border-color: rgba(239, 68, 68, 0.4);
+            color: #fca5a5; 
+        }
 
         /* Chat Kutusu */
         #chat-box { 
             flex: 1; 
-            padding: 20px; 
+            padding: 24px; 
             overflow-y: auto; 
             display: flex; 
             flex-direction: column; 
-            gap: 16px; 
+            gap: 20px; 
             scroll-behavior: smooth;
         }
 
         .msg-row {
             display: flex;
-            gap: 12px;
-            max-width: 82%;
+            gap: 14px;
+            max-width: 85%;
+            animation: fadeIn 0.3s ease-in-out;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
         }
 
         .msg-row.user-row { align-self: flex-end; flex-direction: row-reverse; }
         .msg-row.bot-row { align-self: flex-start; }
 
         .msg-icon {
-            width: 32px;
-            height: 32px;
-            border-radius: 50%;
+            width: 36px;
+            height: 36px;
+            border-radius: 12px;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 14px;
+            font-size: 15px;
             flex-shrink: 0;
         }
 
-        .user-row .msg-icon { background: var(--user-msg); color: white; }
-        .bot-row .msg-icon { background: #334155; color: var(--accent); }
+        .user-row .msg-icon { background: var(--user-gradient); color: white; }
+        .bot-row .msg-icon { background: rgba(56, 189, 248, 0.15); color: var(--accent); border: 1px solid var(--border-color); }
 
         .msg-bubble { 
-            padding: 14px 18px; 
-            border-radius: 16px; 
+            padding: 16px 20px; 
+            border-radius: 18px; 
             line-height: 1.6; 
             font-size: 15px;
             word-wrap: break-word; 
         }
 
         .user-row .msg-bubble { 
-            background-color: var(--user-msg); 
+            background: var(--user-gradient); 
             color: #ffffff; 
             border-bottom-right-radius: 4px;
+            box-shadow: 0 4px 15px rgba(37, 99, 235, 0.3);
         }
 
         .bot-row .msg-bubble { 
-            background-color: var(--bot-msg); 
+            background-color: var(--bot-bg); 
             color: var(--text-main); 
             border-bottom-left-radius: 4px;
-            border: 1px solid #334155;
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            backdrop-filter: blur(10px);
             white-space: pre-wrap;
         }
 
-        /* Hızlı Öneri Butonları */
+        /* Hızlı Sorular */
         .chips-container {
             display: flex;
-            gap: 8px;
-            padding: 0 20px 10px 20px;
+            gap: 10px;
+            padding: 0 24px 12px 24px;
             overflow-x: auto;
         }
 
         .chip {
-            background: #1e293b;
-            border: 1px solid #334155;
+            background: rgba(255, 255, 255, 0.04);
+            border: 1px solid rgba(255, 255, 255, 0.1);
             color: var(--text-muted);
-            padding: 6px 14px;
+            padding: 8px 16px;
             border-radius: 20px;
             font-size: 13px;
             cursor: pointer;
             white-space: nowrap;
-            transition: 0.2s;
+            transition: all 0.2s ease;
         }
-        .chip:hover { border-color: var(--accent); color: var(--accent); }
+        .chip:hover { 
+            border-color: var(--accent); 
+            color: var(--accent); 
+            background: rgba(56, 189, 248, 0.1);
+            transform: translateY(-2px);
+        }
 
-        /* Mesaj Giriş Alanı */
+        /* Input Alanı */
         #input-container { 
             display: flex; 
-            gap: 10px; 
-            padding: 16px 20px; 
-            background: #0f172a;
-            border-top: 1px solid #1e293b;
+            gap: 12px; 
+            padding: 20px 24px; 
+            background: rgba(15, 23, 42, 0.9);
+            border-top: 1px solid var(--border-color);
         }
 
         input { 
             flex: 1; 
-            padding: 14px 18px; 
-            border-radius: 12px; 
-            border: 1px solid #334155; 
-            background-color: #1e293b; 
+            padding: 16px 20px; 
+            border-radius: 14px; 
+            border: 1px solid rgba(255, 255, 255, 0.12); 
+            background-color: rgba(30, 41, 59, 0.6); 
             color: #fff; 
             font-size: 15px; 
+            font-family: inherit;
             outline: none; 
-            transition: 0.2s;
+            transition: all 0.3s ease;
         }
 
-        input:focus { border-color: var(--accent); }
+        input:focus { 
+            border-color: var(--accent); 
+            box-shadow: 0 0 15px var(--accent-glow);
+            background-color: rgba(30, 41, 59, 0.9);
+        }
 
         button.send-btn { 
-            padding: 0 22px; 
-            border-radius: 12px; 
+            padding: 0 26px; 
+            border-radius: 14px; 
             border: none; 
             background: linear-gradient(135deg, #38bdf8, #2563eb); 
             color: #fff; 
@@ -198,61 +262,72 @@
             display: flex;
             align-items: center;
             gap: 8px;
-            transition: 0.2s;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px var(--accent-glow);
         }
 
-        button.send-btn:hover { opacity: 0.9; transform: translateY(-1px); }
+        button.send-btn:hover { 
+            transform: translateY(-2px); 
+            box-shadow: 0 6px 20px var(--accent-glow);
+        }
 
-        /* Özel Kaydırma Çubuğu */
         ::-webkit-scrollbar { width: 6px; }
         ::-webkit-scrollbar-track { background: transparent; }
-        ::-webkit-scrollbar-thumb { background: #334155; border-radius: 10px; }
+        ::-webkit-scrollbar-thumb { background: rgba(255, 255, 255, 0.15); border-radius: 10px; }
     </style>
 </head>
 <body>
 
+    <!-- Arka Plan Işıkları -->
+    <div class="bg-glow-1"></div>
+    <div class="bg-glow-2"></div>
+
     <div class="chat-wrapper">
-        <!-- Üst Header -->
+        <!-- Header -->
         <div class="chat-header">
             <div class="bot-info">
-                <div class="avatar"><i class="fa-solid fa-robot"></i></div>
+                <div class="avatar"><i class="fa-solid fa-sparkles"></i></div>
                 <div class="bot-details">
-                    <h2>Güneş AI Bot</h2>
+                    <h2>Güneş AI</h2>
                     <span class="status"><span class="status-dot"></span> Çevrim içi (Gemini 1.5 Flash)</span>
                 </div>
             </div>
             <div class="header-actions">
-                <button onclick="clearChat()" title="Sohbeti Temizle"><i class="fa-solid fa-trash-can"></i> Temizle</button>
+                <button onclick="clearChat()"><i class="fa-solid fa-rotate-right"></i> Temizle</button>
             </div>
         </div>
 
-        <!-- Chat Mesaj Alanı -->
+        <!-- Sohbet Alanı -->
         <div id="chat-box">
             <div class="msg-row bot-row">
                 <div class="msg-icon"><i class="fa-solid fa-robot"></i></div>
-                <div class="msg-bubble">Merhaba! Ben Güneş AI. Sana bugün nasıl yardımcı olabilirim? 👋</div>
+                <div class="msg-bubble">Selam! Ben Güneş AI. Sana nasıl yardımcı olabilirim? 🚀</div>
             </div>
         </div>
 
-        <!-- Hızlı Soru Çipleri -->
+        <!-- Öneri Butonları -->
         <div class="chips-container">
-            <div class="chip" onclick="sendQuickMsg('Bana ilginç bir bilgi ver!')">💡 İlginç bir bilgi</div>
-            <div class="chip" onclick="sendQuickMsg('Bana eğlenceli bir fıkra anlat')">😂 Fıkra anlat</div>
-            <div class="chip" onclick="sendQuickMsg('Kod yazmama yardım edebilir misin?')">💻 Kod yardımı</div>
+            <div class="chip" onclick="sendQuickMsg('Bana ilginç ve bilinmeyen bir bilgi ver!')">💡 İlginç Bir Bilgi</div>
+            <div class="chip" onclick="sendQuickMsg('Komik bir espri yapabilir misin?')">😂 Espri Yap</div>
+            <div class="chip" onclick="sendQuickMsg('Bana HTML/CSS ile güzel bir buton kodu yaz')">💻 Kod Örneği</div>
         </div>
 
-        <!-- Alt Giriş Paneli -->
+        <!-- Mesaj Yazma Alanı -->
         <div id="input-container">
-            <input type="text" id="user-input" placeholder="Mesajınızı yazın..." onkeydown="if(event.key==='Enter') sendMessage()">
+            <input type="text" id="user-input" placeholder="Bir şeyler yaz..." onkeydown="if(event.key==='Enter') sendMessage()">
             <button class="send-btn" onclick="sendMessage()"><i class="fa-solid fa-paper-plane"></i></button>
         </div>
     </div>
 
     <script>
-        // GitHub güvenlik kontrolüne takılmaması için API anahtarını 2 parçaya böldük:
-        // Kendi API anahtarını ikiye bölüp tırnakların içine yapıştırabilirsin.
-        const part1 = "AQ.Ab8RN6LbpVJB37p-lPJ_sBvI";
-        const part2 = "aZ7CU3LvgyBpEfYrN0lml0Hv1g";
+        // ===============================================================
+        //  API ANAHTARINI BURAYA EKLİYORSUN:
+        //  Google AI Studio'dan aldığın anahtarı (örn: AIzaSyD1234567890abcdef)
+        //  ortadan ikiye bölüp ilk yarısını part1'e, kalanını part2'ye yaz!
+        // ===============================================================
+        
+        const part1 = "AIzaSy_BURAYA_İLK_YARIYI_YAZ_"; 
+        const part2 = "BURAYA_İKİNCİ_YARIYI_YAZ";
         
         const API_KEY = part1 + part2;
         
@@ -268,7 +343,7 @@
             document.getElementById('chat-box').innerHTML = `
                 <div class="msg-row bot-row">
                     <div class="msg-icon"><i class="fa-solid fa-robot"></i></div>
-                    <div class="msg-bubble">Sohbet geçmişi temizlendi. Yeni bir soru sorabilirsin! 😊</div>
+                    <div class="msg-bubble">Sohbet sıfırlandı. Yeni bir soru sorabilirsin! ✨</div>
                 </div>`;
         }
 
@@ -279,7 +354,6 @@
 
             const chatBox = document.getElementById('chat-box');
 
-            // Kullanıcı Mesajını Ekle
             chatBox.innerHTML += `
                 <div class="msg-row user-row">
                     <div class="msg-icon"><i class="fa-solid fa-user"></i></div>
@@ -289,11 +363,12 @@
             input.value = '';
             chatBox.scrollTop = chatBox.scrollHeight;
 
-            if (!API_KEY || API_KEY.length < 10) {
+            // Eğer varsayılan uyarı yazısı değiştirilmediyse uyarı ver
+            if (part1.includes("BURAYA_İLK_YARIYI_YAZ")) {
                 chatBox.innerHTML += `
                     <div class="msg-row bot-row">
                         <div class="msg-icon"><i class="fa-solid fa-triangle-exclamation"></i></div>
-                        <div class="msg-bubble">⚠️ Geçerli bir API anahtarı bulunamadı. Lütfen koddaki part1 ve part2 alanlarını kontrol edin.</div>
+                        <div class="msg-bubble">⚠️ <b>API Anahtarı Eksik!</b><br>Lütfen <code>index.html</code> dosyasını açıp <b>part1</b> ve <b>part2</b> kısımlarına kendi Google API anahtarını yapıştır.</div>
                     </div>`;
                 chatBox.scrollTop = chatBox.scrollHeight;
                 return;
@@ -315,7 +390,7 @@
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
                         system_instruction: {
-                            parts: [{ text: "Sen her konuda son derece bilgili, yardımsever, samimi ve Türkçe konuşan havalı bir yapay zekasın." }]
+                            parts: [{ text: "Sen her konuda uzman, çok yetenekli, yardımsever, Türkçe konuşan modern bir yapay zekasın." }]
                         },
                         contents: chatHistory
                     })
@@ -337,7 +412,7 @@
                     chatBox.innerHTML += `
                         <div class="msg-row bot-row">
                             <div class="msg-icon"><i class="fa-solid fa-triangle-exclamation"></i></div>
-                            <div class="msg-bubble">Bir yanıt alınamadı. API anahtarınızın kotasını veya doğruluğunu kontrol edin.</div>
+                            <div class="msg-bubble">Bir yanıt alınamadı. API anahtarını doğru girdiğinden emin ol.</div>
                         </div>`;
                 }
 
@@ -348,7 +423,7 @@
                 chatBox.innerHTML += `
                     <div class="msg-row bot-row">
                         <div class="msg-icon"><i class="fa-solid fa-circle-xmark"></i></div>
-                        <div class="msg-bubble">Bağlantı hatası oluştu! İnternet bağlantınızı kontrol edin.</div>
+                        <div class="msg-bubble">Bağlantı hatası oluştu! İnternet bağlantını veya API anahtarını kontrol et.</div>
                     </div>`;
             }
             chatBox.scrollTop = chatBox.scrollHeight;
