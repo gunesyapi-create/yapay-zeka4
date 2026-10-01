@@ -35,7 +35,6 @@
             position: relative;
         }
 
-        /* Arka Plan Hareketli Neon Küreler ve Izgara */
         .bg-grid {
             position: absolute;
             width: 100%;
@@ -77,7 +76,6 @@
             100% { transform: translate(50px, 40px) scale(1.15); }
         }
 
-        /* Ana Gövde Cam Efekti */
         .chat-container {
             position: relative;
             z-index: 10;
@@ -95,7 +93,6 @@
             overflow: hidden;
         }
 
-        /* Üst Header */
         .chat-header {
             padding: 20px 28px;
             background: rgba(11, 15, 25, 0.85);
@@ -121,7 +118,7 @@
         }
 
         .bot-brand h2 { font-size: 19px; font-weight: 700; color: #fff; letter-spacing: 0.3px; }
-        .status-badge { font-size: 12px; color: #34d399; display: flex; align-items: center; gap: 6px; font-weight: 500; }
+        .status-badge { font-size: 13px; color: #34d399; display: flex; align-items: center; gap: 6px; font-weight: 500; }
         .status-dot { width: 8px; height: 8px; background-color: #34d399; border-radius: 50%; box-shadow: 0 0 10px #34d399; }
 
         .header-btns { display: flex; gap: 10px; }
@@ -140,7 +137,6 @@
         }
         .icon-btn:hover { background: rgba(56, 189, 248, 0.15); border-color: var(--accent-cyan); color: #fff; }
 
-        /* Mesaj Alanı */
         #chat-box { 
             flex: 1; 
             padding: 28px; 
@@ -204,7 +200,6 @@
             white-space: pre-wrap;
         }
 
-        /* Hızlı Sorular */
         .chips-bar {
             display: flex;
             gap: 10px;
@@ -231,7 +226,6 @@
             transform: translateY(-2px);
         }
 
-        /* Alt Mesaj Alanı */
         #input-area { 
             display: flex; 
             gap: 12px; 
@@ -280,33 +274,6 @@
             box-shadow: 0 6px 20px var(--glow-color);
         }
 
-        /* Modal (Ayarlar Penceresi) */
-        .modal-overlay {
-            position: fixed;
-            top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0, 0, 0, 0.7);
-            backdrop-filter: blur(8px);
-            z-index: 100;
-            display: none;
-            justify-content: center;
-            align-items: center;
-        }
-
-        .modal-card {
-            background: #111827;
-            border: 1px solid var(--card-border);
-            border-radius: 24px;
-            padding: 28px;
-            max-width: 450px;
-            width: 90%;
-            box-shadow: 0 20px 40px rgba(0,0,0,0.8);
-        }
-
-        .modal-card h3 { margin-bottom: 12px; color: #fff; display: flex; align-items: center; gap: 8px; }
-        .modal-card p { font-size: 14px; color: var(--text-muted); margin-bottom: 20px; line-height: 1.5; }
-        .modal-card input { width: 100%; margin-bottom: 20px; }
-        .modal-actions { display: flex; justify-content: flex-end; gap: 10px; }
-
         ::-webkit-scrollbar { width: 6px; }
         ::-webkit-scrollbar-track { background: transparent; }
         ::-webkit-scrollbar-thumb { background: rgba(255, 255, 255, 0.15); border-radius: 10px; }
@@ -325,12 +292,11 @@
                 <div class="avatar-glow"><i class="fa-solid fa-wand-magic-sparkles"></i></div>
                 <div>
                     <h2>Güneş AI</h2>
-                    <span class="status-badge"><span class="status-dot"></span> Çevrim içi</span>
+                    <span class="status-badge"><span class="status-dot"></span> Çevrimiçi</span>
                 </div>
             </div>
             <div class="header-btns">
-                <button class="icon-btn" onclick="openSettings()" title="API Anahtarı Ayarları"><i class="fa-solid fa-gear"></i> Ayarlar</button>
-                <button class="icon-btn" onclick="clearChat()" title="Sohbeti Temizle"><i class="fa-solid fa-rotate-right"></i></button>
+                <button class="icon-btn" onclick="clearChat()" title="Sohbeti Temizle"><i class="fa-solid fa-rotate-right"></i> Temizle</button>
             </div>
         </div>
 
@@ -346,7 +312,7 @@
         <div class="chips-bar">
             <div class="chip" onclick="sendQuick('Bana ilginç ve az bilinen bir bilgi ver!')">💡 İlginç Bilgi</div>
             <div class="chip" onclick="sendQuick('Komik ve eğlenceli bir espri yap')">😂 Espri Yap</div>
-            <div class="chip" onclick="sendQuick('Bana günün motivaasyon sözünü söyle')">✨ Motivasyon</div>
+            <div class="chip" onclick="sendQuick('Bana harika bir oyun önerisi ver!')">🎮 Oyun Önerisi</div>
         </div>
 
         <!-- Mesaj Giriş Alanı -->
@@ -356,48 +322,13 @@
         </div>
     </div>
 
-    <!-- Ayarlar Modalı -->
-    <div class="modal-overlay" id="settings-modal">
-        <div class="modal-card">
-            <h3><i class="fa-solid fa-key" style="color: var(--accent-cyan);"></i> API Anahtarı Ayarı</h3>
-            <p>Google AI Studio'dan aldığın API anahtarını buraya yapıştırıp kaydedebilirsin. Sitede saklanır ve sorunsuz çalışır.</p>
-            <input type="text" id="api-key-input" placeholder="AIzaSy...">
-            <div class="modal-actions">
-                <button class="icon-btn" onclick="closeSettings()">İptal</button>
-                <button class="send-btn" style="padding: 10px 20px;" onclick="saveApiKey()">Kaydet</button>
-            </div>
-        </div>
-    </div>
-
     <script>
-        // Koda API yazmak istersen buraya koyabilirsin (İsteğe bağlı):
-        const DEFAULT_KEY = "BURAYA_KEY_YAZABILIRSIN";
-
-        function getApiKey() {
-            return localStorage.getItem('GUNES_AI_KEY') || DEFAULT_KEY;
-        }
+        // =========================================================
+        // TEK SEFERDE API ANAHTARINI AŞAĞIDAKİ TIRNAKLARIN İÇİNE YAPIŞTIR:
+        // =========================================================
+        const API_KEY = "BURAYA_API_KEY_YAZ";
 
         let chatHistory = [];
-
-        function openSettings() {
-            document.getElementById('api-key-input').value = localStorage.getItem('GUNES_AI_KEY') || '';
-            document.getElementById('settings-modal').style.display = 'flex';
-        }
-
-        function closeSettings() {
-            document.getElementById('settings-modal').style.display = 'none';
-        }
-
-        function saveApiKey() {
-            const key = document.getElementById('api-key-input').value.trim();
-            if (key) {
-                localStorage.setItem('GUNES_AI_KEY', key);
-                alert("API Anahtarı başarıyla kaydedildi! Artık sohbet edebilirsin.");
-            } else {
-                localStorage.removeItem('GUNES_AI_KEY');
-            }
-            closeSettings();
-        }
 
         function sendQuick(text) {
             document.getElementById('user-input').value = text;
@@ -418,10 +349,9 @@
             const message = input.value.trim();
             if (!message) return;
 
-            const apiKey = getApiKey();
             const chatBox = document.getElementById('chat-box');
 
-            // Kullanıcı mesajı
+            // Kullanıcı mesajını ekle
             chatBox.innerHTML += `
                 <div class="msg-row user-row">
                     <div class="msg-avatar"><i class="fa-solid fa-user"></i></div>
@@ -431,15 +361,14 @@
             input.value = '';
             chatBox.scrollTop = chatBox.scrollHeight;
 
-            // Key Kontrolü
-            if (!apiKey || apiKey.includes("BURAYA_KEY") || apiKey.length < 15) {
+            // API Key kontrolü
+            if (!API_KEY || API_KEY.includes("BURAYA_API_KEY") || API_KEY.length < 10) {
                 chatBox.innerHTML += `
                     <div class="msg-row bot-row">
                         <div class="msg-avatar"><i class="fa-solid fa-triangle-exclamation"></i></div>
-                        <div class="msg-content">⚠️ <b>API Anahtarı Bulunamadı!</b><br>Lütfen sağ üstteki <b>⚙️ Ayarlar</b> butonuna tıklayarak Google API anahtarını ekleyin.</div>
+                        <div class="msg-content">⚠️ <b>API Anahtarı Eksik!</b><br>Lütfen koddaki API_KEY tırnaklarının içine kendi Google API anahtarını yapıştır.</div>
                     </div>`;
                 chatBox.scrollTop = chatBox.scrollHeight;
-                openSettings();
                 return;
             }
 
@@ -454,7 +383,7 @@
             chatHistory.push({ role: "user", parts: [{ text: message }] });
 
             try {
-                const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`, {
+                const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${API_KEY}`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
@@ -481,7 +410,7 @@
                     chatBox.innerHTML += `
                         <div class="msg-row bot-row">
                             <div class="msg-avatar"><i class="fa-solid fa-circle-exclamation"></i></div>
-                            <div class="msg-content">Yanıt alınamadı. API anahtarınız geçersiz veya kotası dolmuş olabilir.</div>
+                            <div class="msg-content">Yanıt alınamadı. API anahtarını kontrol et.</div>
                         </div>`;
                 }
 
@@ -492,7 +421,7 @@
                 chatBox.innerHTML += `
                     <div class="msg-row bot-row">
                         <div class="msg-avatar"><i class="fa-solid fa-circle-xmark"></i></div>
-                        <div class="msg-content">Bağlantı hatası oluştu! İnternetinizi veya API anahtarınızı kontrol edin.</div>
+                        <div class="msg-content">Bağlantı hatası oluştu! İnternet bağlantını veya API anahtarını kontrol et.</div>
                     </div>`;
             }
             chatBox.scrollTop = chatBox.scrollHeight;
