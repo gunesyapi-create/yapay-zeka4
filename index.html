@@ -3,11 +3,14 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Güneş AI Ultra - Işık Hızı</title>
+    <title>Güneş AI Ultra - Turbo Hız</title>
     
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
-    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700&family=Fira+Code:wght@400&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/atom-one-dark.min.css">
+    
     <script src="https://cdnjs.cloudflare.com/ajax/libs/marked/9.1.2/marked.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/highlight.min.js"></script>
 
     <style>
         :root {
@@ -27,10 +30,10 @@
         }
 
         .chat-container {
-            max-width: 950px; width: 100%; height: 96vh;
+            max-width: 1050px; width: 100%; height: 96vh;
             background: var(--card-bg); border: 1px solid var(--card-border);
             border-radius: 16px; display: flex; flex-direction: column;
-            box-shadow: 0 20px 40px rgba(0,0,0,0.9);
+            box-shadow: 0 20px 40px rgba(0,0,0,0.9), 0 0 25px rgba(56, 189, 248, 0.2);
             overflow: hidden;
         }
 
@@ -48,6 +51,7 @@
             padding: 6px 10px; border-radius: 8px; font-size: 13px; font-weight: 600; cursor: pointer; outline: none;
         }
         .icon-btn { color: #f8fafc; border-color: rgba(255,255,255,0.2); }
+        .icon-btn:hover { background: rgba(56, 189, 248, 0.2); }
 
         #chat-box {
             flex: 1; padding: 20px; overflow-y: auto; display: flex; flex-direction: column; gap: 14px;
@@ -75,6 +79,7 @@
             padding: 0 20px; border-radius: 10px; border: none; background: var(--accent-cyan);
             color: #020617; font-weight: 700; cursor: pointer; font-size: 14px;
         }
+        button.send-btn:hover { opacity: 0.9; }
         ::-webkit-scrollbar { width: 5px; }
         ::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.2); border-radius: 10px; }
     </style>
@@ -88,7 +93,7 @@
             </div>
             <div class="header-controls">
                 <select id="ai-mode" class="mode-select">
-                    <option value="turbo">⚡ Turbo</option>
+                    <option value="turbo">⚡ Turbo (Işık Hızı)</option>
                     <option value="coder">💻 Kod Mimarı</option>
                     <option value="security">🛡️ Siber Güvenlik</option>
                 </select>
@@ -98,7 +103,7 @@
 
         <div id="chat-box">
             <div class="msg-row bot-row">
-                <div class="msg-content">Roket gibi hazır kanka! 🚀</div>
+                <div class="msg-content">Hızlı mod aktif kanka! Yaz gönder, anında cevaptayım. 🚀</div>
             </div>
         </div>
 
@@ -124,19 +129,21 @@
             input.value = '';
             chatBox.scrollTop = chatBox.scrollHeight;
 
-            // Anlık Yükleniyor
+            // Yükleniyor
             const loadId = 'l-' + Date.now();
             const loadRow = document.createElement('div');
             loadRow.className = 'msg-row bot-row';
             loadRow.id = loadId;
-            loadRow.innerHTML = `<div class="msg-content">...</div>`;
+            loadRow.innerHTML = `<div class="msg-content"><i class="fa-solid fa-spinner fa-spin"></i> Yazılıyor...</div>`;
             chatBox.appendChild(loadRow);
             chatBox.scrollTop = chatBox.scrollHeight;
 
+            // Mod Kuralı
             const mode = document.getElementById('ai-mode').value;
-            let prompt = `Yusuf Can Güneş'in asistanısın. Kısa ve net Türkçe yanıt ver: ${message}`;
-            if (mode === 'coder') prompt = `Yusuf Can Güneş'in yazılım mimarısın. Kısa kod yaz: ${message}`;
-            if (mode === 'security') prompt = `Yusuf Can Güneş'in siber güvenlik uzmanısın. Kısa yanıtla: ${message}`;
+            let prompt = `Sen Güneş AI Ultra'sın. Yapımcın Yusuf Can Güneş. Türkçe yanıt ver. Soru: ${message}`;
+            if (mode === 'turbo') prompt = `Yusuf Can Güneş'in asistanısın. En kısa, net ve hızlı şekilde Türkçe yanıt ver: ${message}`;
+            if (mode === 'coder') prompt = `Yusuf Can Güneş'in yazılım mimarısın. Temiz kodlar yaz. Soru: ${message}`;
+            if (mode === 'security') prompt = `Yusuf Can Güneş'in siber güvenlik uzmanısın. Yasal savunma odaklı yanıtla: ${message}`;
 
             try {
                 const res = await fetch(`https://text.pollinations.ai/${encodeURIComponent(prompt)}`);
@@ -152,7 +159,7 @@
                 document.getElementById(loadId).remove();
                 const errRow = document.createElement('div');
                 errRow.className = 'msg-row bot-row';
-                errRow.innerHTML = `<div class="msg-content" style="color:#f87171;">Hata!</div>`;
+                errRow.innerHTML = `<div class="msg-content" style="color:#f87171;">Hata oluştu, tekrar dene kanka.</div>`;
                 chatBox.appendChild(errRow);
             } finally {
                 chatBox.scrollTop = chatBox.scrollHeight;
