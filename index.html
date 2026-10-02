@@ -30,7 +30,7 @@
         }
 
         .chat-container {
-            max-width: 1050px; width: 100%; height: 96vh;
+            max-width: 950px; width: 100%; height: 96vh;
             background: var(--card-bg); border: 1px solid var(--card-border);
             border-radius: 16px; display: flex; flex-direction: column;
             box-shadow: 0 20px 40px rgba(0,0,0,0.9), 0 0 25px rgba(56, 189, 248, 0.2);
@@ -103,7 +103,7 @@
 
         <div id="chat-box">
             <div class="msg-row bot-row">
-                <div class="msg-content">Hızlı mod aktif kanka! Yaz gönder, anında cevaptayım. 🚀</div>
+                <div class="msg-content">Hızlı ve temiz mod aktif kanka! Yaz gönder, anında cevaptayım. 🚀</div>
             </div>
         </div>
 
@@ -140,9 +140,8 @@
 
             // Mod Kuralı
             const mode = document.getElementById('ai-mode').value;
-            let prompt = `Sen Güneş AI Ultra'sın. Yapımcın Yusuf Can Güneş. Türkçe yanıt ver. Soru: ${message}`;
-            if (mode === 'turbo') prompt = `Yusuf Can Güneş'in asistanısın. En kısa, net ve hızlı şekilde Türkçe yanıt ver: ${message}`;
-            if (mode === 'coder') prompt = `Yusuf Can Güneş'in yazılım mimarısın. Temiz kodlar yaz. Soru: ${message}`;
+            let prompt = `Yusuf Can Güneş'in asistanısın. Türkçe yanıt ver: ${message}`;
+            if (mode === 'coder') prompt = `Yusuf Can Güneş'in yazılım mimarısın. Temiz kod yaz. Soru: ${message}`;
             if (mode === 'security') prompt = `Yusuf Can Güneş'in siber güvenlik uzmanısın. Yasal savunma odaklı yanıtla: ${message}`;
 
             try {
