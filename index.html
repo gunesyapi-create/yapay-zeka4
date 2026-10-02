@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Güneş AI Ultra - Turbo Asistan</title>
+    <title>Güneş AI Ultra - Dev Güvenlikli Asistan</title>
     
     <!-- Dış Kütüphaneler -->
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
@@ -15,15 +15,16 @@
 
     <style>
         :root {
-            --bg-dark: #030712;
-            --card-bg: rgba(15, 23, 42, 0.88);
-            --card-border: rgba(56, 189, 248, 0.3);
+            --bg-dark: #020617;
+            --card-bg: rgba(15, 23, 42, 0.9);
+            --card-border: rgba(56, 189, 248, 0.35);
             --user-bubble: linear-gradient(135deg, #2563eb, #1d4ed8);
-            --bot-bubble: rgba(30, 41, 59, 0.9);
+            --bot-bubble: rgba(30, 41, 59, 0.95);
             --accent-cyan: #38bdf8;
             --accent-purple: #8b5cf6;
             --accent-green: #10b981;
-            --glow-color: rgba(56, 189, 248, 0.35);
+            --accent-red: #ef4444;
+            --glow-color: rgba(56, 189, 248, 0.4);
             --text-main: #f8fafc;
             --text-muted: #94a3b8;
         }
@@ -63,12 +64,12 @@
             border-radius: 50%;
             filter: blur(140px);
             z-index: 0;
-            opacity: 0.45;
+            opacity: 0.5;
             animation: pulseGlow 8s infinite alternate ease-in-out;
         }
 
-        .blob-1 { width: 450px; height: 450px; background: #38bdf8; top: -10%; left: -10%; }
-        .blob-2 { width: 500px; height: 500px; background: #7c3aed; bottom: -15%; right: -10%; animation-delay: -4s; }
+        .blob-1 { width: 500px; height: 500px; background: #38bdf8; top: -10%; left: -10%; }
+        .blob-2 { width: 550px; height: 550px; background: #7c3aed; bottom: -15%; right: -10%; animation-delay: -4s; }
 
         @keyframes pulseGlow {
             0% { transform: translate(0, 0) scale(1); }
@@ -127,16 +128,17 @@
         .header-btns { display: flex; gap: 8px; align-items: center; }
 
         .mode-select {
-            background: rgba(255, 255, 255, 0.06);
-            border: 1px solid rgba(255, 255, 255, 0.15);
+            background: rgba(15, 23, 42, 0.9);
+            border: 1px solid var(--accent-cyan);
             color: var(--accent-cyan);
-            padding: 8px 12px;
+            padding: 9px 14px;
             border-radius: 12px;
             font-size: 13px;
-            font-weight: 600;
+            font-weight: 700;
             outline: none;
             cursor: pointer;
             transition: all 0.2s ease;
+            box-shadow: 0 0 10px rgba(56, 189, 248, 0.2);
         }
 
         .mode-select option { background: #0f172a; color: #fff; }
@@ -350,14 +352,14 @@
                 <div class="avatar-glow"><i class="fa-solid fa-bolt-lightning"></i></div>
                 <div>
                     <h2>Güneş AI Ultra</h2>
-                    <span class="status-badge"><span class="status-dot"></span> Turbo Motor • Yusuf Can Güneş</span>
+                    <span class="status-badge"><span class="status-dot"></span> Güvenli Motor • Yusuf Can Güneş</span>
                 </div>
             </div>
             <div class="header-btns">
-                <select id="ai-mode" class="mode-select" title="Yapay Zeka Modu">
-                    <option value="turbo">⚡ Turbo Hızlı Mod</option>
-                    <option value="coder">💻 Yazılım & Kodlama</option>
-                    <option value="gamer">🎮 Oyun & Minecraft</option>
+                <select id="ai-mode" class="mode-select" title="Çalışma Modu Seçin">
+                    <option value="turbo">⚡ Turbo Mod (Işık Hızı)</option>
+                    <option value="coder">💻 Kod Modu (Mimar & Güvenlik)</option>
+                    <option value="security">🛡️ Siber Güvenlik Modu</option>
                 </select>
                 <button class="icon-btn" onclick="exportChat()"><i class="fa-solid fa-download"></i> Kaydet</button>
                 <button class="icon-btn" onclick="clearChat()"><i class="fa-solid fa-trash-can"></i> Temizle</button>
@@ -368,16 +370,16 @@
         <div id="chat-box">
             <div class="msg-row bot-row">
                 <div class="msg-avatar"><i class="fa-solid fa-robot"></i></div>
-                <div class="msg-content">Naber kanka! Ben <b>Güneş AI Ultra</b>. Beni <b>Yusuf Can Güneş</b> üretti. Sıfır gecikme ve turbo hızla hazırım. Sorunu gönder! 🚀</div>
+                <div class="msg-content">Naber kanka! Ben <b>Güneş AI Ultra</b>. Yapımcım <b>Yusuf Can Güneş</b>. İstediğin modu seçip mesajını atabilirsin! 🚀</div>
             </div>
         </div>
 
         <!-- Hızlı Öneri Butonları -->
         <div class="chips-bar">
             <div class="chip" onclick="sendQuick('Seni kim üretti?')">👑 Seni Kim Üretti?</div>
-            <div class="chip" onclick="sendQuick('Bana harika bir HTML kopyalanabilir oyun kodu yaz')">🎮 HTML Oyun Kodu Yaz</div>
-            <div class="chip" onclick="sendQuick('Minecraft Redstone ve Komut Blokları ile neler yapılabilir?')">⛏️ Minecraft Komutları</div>
-            <div class="chip" onclick="sendQuick('Bana komik ve akılcı bir espri yap')">😂 Espri Yap</div>
+            <div class="chip" onclick="sendQuick('Bana HTML, CSS ve JS ile gelişmiş bir Yılan Oyunu yaz')">🎮 Yılan Oyunu Kodu</div>
+            <div class="chip" onclick="sendQuick('Bir web sitesinde SQL Injection zafiyeti nasıl önlenir?')">🛡️ Güvenlik Zafiyeti Önleme</div>
+            <div class="chip" onclick="sendQuick('Python ile hızlı bir dosya şifreleyici yaz')">🔐 Şifreleme Algoritması</div>
         </div>
 
         <!-- Alt Giriş Barı -->
@@ -398,7 +400,7 @@
         });
 
         window.onload = () => {
-            const savedHistory = localStorage.getItem('gunes_ai_turbo_history');
+            const savedHistory = localStorage.getItem('gunes_ai_dev_history');
             if (savedHistory) {
                 try {
                     chatHistory = JSON.parse(savedHistory);
@@ -416,7 +418,7 @@
 
         function clearChat() {
             chatHistory = [];
-            localStorage.removeItem('gunes_ai_turbo_history');
+            localStorage.removeItem('gunes_ai_dev_history');
             document.getElementById('chat-box').innerHTML = `
                 <div class="msg-row bot-row">
                     <div class="msg-avatar"><i class="fa-solid fa-robot"></i></div>
@@ -471,20 +473,31 @@
 
             // Mod Seçimi
             const selectedMode = document.getElementById('ai-mode').value;
-            let systemPrompt = "Sen Güneş AI Ultra adında süper hızlı, akıllı ve samimi bir yapay zeka asistanısın. Seni YUSUF CAN GÜNEŞ üretti ve geliştirdi. Seni kim üretti, yapımcın kim denirse gururla Yusuf Can Güneş yanıtını ver. Yanıtlarını uzatmadan, seri, doğrudan ve hızlı ver. Türkçe konuş.";
+            let systemPrompt = "";
             
-            if (selectedMode === 'coder') {
-                systemPrompt += " Sen uzman bir yazılımcısın. Kod örneklerini temiz, eksiksiz ve yorum satırlarıyla ver.";
-            } else if (selectedMode === 'gamer') {
-                systemPrompt += " Sen Minecraft, PUBG ve oyun dünyasının ustası bir oyuncusun. Oyun taktiklerini ve Minecraft komutlarını en pratik şekilde anlat.";
+            if (selectedMode === 'turbo') {
+                systemPrompt = "Sen Güneş AI Ultra adında süper hızlı, keskin ve doğrudan yanıt veren bir asistansın. Seni YUSUF CAN GÜNEŞ üretti. Seni kim üretti sorusuna gururla 'Yusuf Can Güneş' cevabını ver. Yanıtları doğrudan, zaman kaybettirmeden, kısa ve net ver. Türkçe konuş.";
+            } else if (selectedMode === 'coder') {
+                systemPrompt = "Sen Güneş AI Ultra adında kıdemli bir yazılım mimarısın. Seni YUSUF CAN GÜNEŞ üretti. Kodları eksiksiz, temiz, güvenlik standartlarına uygun ve yorum satırlarıyla yaz. Hataları anında tespit et.";
+            } else if (selectedMode === 'security') {
+                systemPrompt = "Sen Güneş AI Ultra adında kıdemli bir Siber Güvenlik Uzmanısın. Seni YUSUF CAN GÜNEŞ üretti. Güvenlik zafiyetleri, şifreleme, ağ analizi ve güvenli sistem tasarımı konularında derin, açıklayıcı ve teknik yanıtlar ver.";
             }
 
             try {
-                // Anında yanıt için doğrudan hızlı get/post optimize yapısı
-                const fullPrompt = `${systemPrompt}\n\nKullanıcı: ${message}`;
-                const response = await fetch(`https://text.pollinations.ai/${encodeURIComponent(fullPrompt)}?model=openai&cache=false`);
+                // Güvenli POST İstek Yapısı (CORS & AdBlock Koruma Dahil)
+                const response = await fetch('https://text.pollinations.ai/', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        messages: [
+                            { role: "system", content: systemPrompt },
+                            ...chatHistory.slice(-8)
+                        ],
+                        model: "openai"
+                    })
+                });
 
-                if (!response.ok) throw new Error("Ağ hatası");
+                if (!response.ok) throw new Error("Ağ yanıtı başarısız");
 
                 const botReply = await response.text();
 
@@ -502,14 +515,34 @@
                 applyCodeBlocks();
 
             } catch (err) {
-                const loadingElement = document.getElementById(loadingId);
-                if (loadingElement) loadingElement.remove();
+                // Yedek GET Bağlantısı (POST Engellenirse Çalışır)
+                try {
+                    const fallbackUrl = `https://text.pollinations.ai/${encodeURIComponent(systemPrompt + "\n\nKullanıcı: " + message)}?model=openai`;
+                    const fallbackRes = await fetch(fallbackUrl);
+                    const botReply = await fallbackRes.text();
 
-                chatBox.innerHTML += `
-                    <div class="msg-row bot-row">
-                        <div class="msg-avatar"><i class="fa-solid fa-triangle-exclamation"></i></div>
-                        <div class="msg-content">Bağlantı anlık kesildi kanka, tekrar dener misin?</div>
-                    </div>`;
+                    const loadingElement = document.getElementById(loadingId);
+                    if (loadingElement) loadingElement.remove();
+
+                    chatBox.innerHTML += `
+                        <div class="msg-row bot-row">
+                            <div class="msg-avatar"><i class="fa-solid fa-robot"></i></div>
+                            <div class="msg-content">${renderMarkdown(botReply)}</div>
+                        </div>`;
+
+                    chatHistory.push({ role: "assistant", content: botReply });
+                    saveChatHistory();
+                    applyCodeBlocks();
+                } catch (fallbackErr) {
+                    const loadingElement = document.getElementById(loadingId);
+                    if (loadingElement) loadingElement.remove();
+
+                    chatBox.innerHTML += `
+                        <div class="msg-row bot-row">
+                            <div class="msg-avatar"><i class="fa-solid fa-triangle-exclamation"></i></div>
+                            <div class="msg-content">Bağlantı engellendi! Lütfen internet bağlantını veya AdBlock/Eklentilerini kontrol edip tekrar dene kanka.</div>
+                        </div>`;
+                }
             } finally {
                 chatBox.scrollTop = chatBox.scrollHeight;
             }
@@ -544,7 +577,7 @@
 
         function saveChatHistory() {
             if (chatHistory.length > 20) chatHistory = chatHistory.slice(chatHistory.length - 20);
-            localStorage.setItem('gunes_ai_turbo_history', JSON.stringify(chatHistory));
+            localStorage.setItem('gunes_ai_dev_history', JSON.stringify(chatHistory));
         }
 
         function renderSavedChat() {
@@ -569,7 +602,13 @@
         }
 
         function escapeHtml(text) {
-            return text.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace/>/g, "&gt;");
+            if (!text) return '';
+            return text
+                .replace(/&/g, "&amp;")
+                .replace(/</g, "&lt;")
+                .replace(/>/g, "&gt;")
+                .replace(/"/g, "&quot;")
+                .replace(/'/g, "&#039;");
         }
     </script>
 </body>
