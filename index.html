@@ -3,21 +3,28 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Güneş AI - Akıllı Asistan</title>
+    <title>Güneş AI - Ultra Akıllı Asistan</title>
+    <!-- Fontlar ve İkonlar -->
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
-    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Fira+Code:wght@400;500&display=swap" rel="stylesheet">
+    
+    <!-- Markdown ve Kod Renklendirme Kütüphaneleri -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/atom-one-dark.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/marked/9.1.2/marked.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/highlight.min.js"></script>
+
     <style>
         :root {
             --bg-dark: #030712;
-            --card-bg: rgba(17, 24, 39, 0.85);
+            --card-bg: rgba(15, 23, 42, 0.85);
             --card-border: rgba(56, 189, 248, 0.25);
             --user-bubble: linear-gradient(135deg, #2563eb, #1d4ed8);
-            --bot-bubble: rgba(31, 41, 55, 0.85);
+            --bot-bubble: rgba(30, 41, 59, 0.85);
             --accent-cyan: #38bdf8;
             --accent-purple: #8b5cf6;
-            --glow-color: rgba(56, 189, 248, 0.25);
-            --text-main: #f9fafb;
-            --text-muted: #9ca3af;
+            --glow-color: rgba(56, 189, 248, 0.3);
+            --text-main: #f8fafc;
+            --text-muted: #94a3b8;
         }
 
         * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -54,8 +61,8 @@
             animation: pulseGlow 12s infinite alternate ease-in-out;
         }
 
-        .blob-1 { width: 450px; height: 450px; background: #38bdf8; top: -10%; left: -10%; }
-        .blob-2 { width: 500px; height: 500px; background: #7c3aed; bottom: -15%; right: -10%; animation-delay: -6s; }
+        .blob-1 { width: 500px; height: 500px; background: #38bdf8; top: -10%; left: -10%; }
+        .blob-2 { width: 550px; height: 550px; background: #7c3aed; bottom: -15%; right: -10%; animation-delay: -6s; }
 
         @keyframes pulseGlow {
             0% { transform: translate(0, 0) scale(1); }
@@ -65,9 +72,9 @@
         .chat-container {
             position: relative;
             z-index: 10;
-            max-width: 900px;
+            max-width: 1000px;
             width: 100%;
-            height: 92vh;
+            height: 94vh;
             background: var(--card-bg);
             backdrop-filter: blur(25px);
             -webkit-backdrop-filter: blur(25px);
@@ -75,13 +82,13 @@
             border-radius: 24px;
             display: flex;
             flex-direction: column;
-            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.8), 0 0 30px var(--glow-color);
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.9), 0 0 35px var(--glow-color);
             overflow: hidden;
         }
 
         .chat-header {
             padding: 18px 24px;
-            background: rgba(11, 15, 25, 0.9);
+            background: rgba(11, 15, 25, 0.95);
             border-bottom: 1px solid var(--card-border);
             display: flex;
             justify-content: space-between;
@@ -91,20 +98,20 @@
         .bot-brand { display: flex; align-items: center; gap: 14px; }
 
         .avatar-glow {
-            width: 44px;
-            height: 44px;
+            width: 46px;
+            height: 46px;
             border-radius: 14px;
             background: linear-gradient(135deg, var(--accent-cyan), var(--accent-purple));
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 20px;
+            font-size: 22px;
             color: #fff;
-            box-shadow: 0 0 18px var(--glow-color);
+            box-shadow: 0 0 20px var(--glow-color);
         }
 
-        .bot-brand h2 { font-size: 19px; font-weight: 700; color: #fff; }
-        .status-badge { font-size: 13px; color: #34d399; display: flex; align-items: center; gap: 6px; font-weight: 500; margin-top: 2px; }
+        .bot-brand h2 { font-size: 20px; font-weight: 800; color: #fff; letter-spacing: 0.5px; }
+        .status-badge { font-size: 13px; color: #34d399; display: flex; align-items: center; gap: 6px; font-weight: 600; margin-top: 2px; }
         .status-dot { width: 8px; height: 8px; background-color: #34d399; border-radius: 50%; box-shadow: 0 0 10px #34d399; }
 
         .header-btns { display: flex; gap: 8px; }
@@ -130,19 +137,19 @@
             overflow-y: auto; 
             display: flex; 
             flex-direction: column; 
-            gap: 18px; 
+            gap: 20px; 
             scroll-behavior: smooth;
         }
 
         .msg-row {
             display: flex;
-            gap: 12px;
-            max-width: 82%;
+            gap: 14px;
+            max-width: 88%;
             animation: slideUp 0.25s ease-out;
         }
 
         @keyframes slideUp {
-            from { opacity: 0; transform: translateY(10px); }
+            from { opacity: 0; transform: translateY(12px); }
             to { opacity: 1; transform: translateY(0); }
         }
 
@@ -150,13 +157,13 @@
         .msg-row.bot-row { align-self: flex-start; }
 
         .msg-avatar {
-            width: 36px;
-            height: 36px;
+            width: 38px;
+            height: 38px;
             border-radius: 12px;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 14px;
+            font-size: 15px;
             flex-shrink: 0;
         }
 
@@ -164,11 +171,12 @@
         .bot-row .msg-avatar { background: rgba(56, 189, 248, 0.15); color: var(--accent-cyan); border: 1px solid var(--card-border); }
 
         .msg-content { 
-            padding: 14px 18px; 
-            border-radius: 18px; 
-            line-height: 1.6; 
+            padding: 16px 20px; 
+            border-radius: 20px; 
+            line-height: 1.7; 
             font-size: 15px;
             word-wrap: break-word; 
+            overflow-x: auto;
         }
 
         .user-row .msg-content { 
@@ -182,13 +190,46 @@
             color: var(--text-main); 
             border-bottom-left-radius: 4px;
             border: 1px solid rgba(255, 255, 255, 0.08);
-            white-space: pre-wrap;
         }
+
+        /* Markdown Biçimlendirme Stilleri */
+        .msg-content p { margin-bottom: 10px; }
+        .msg-content p:last-child { margin-bottom: 0; }
+        .msg-content h1, .msg-content h2, .msg-content h3 { margin: 12px 0 8px 0; color: var(--accent-cyan); }
+        .msg-content ul, .msg-content ol { margin-left: 20px; margin-bottom: 10px; }
+        .msg-content li { margin-bottom: 4px; }
+        .msg-content code { font-family: 'Fira Code', monospace; background: rgba(0,0,0,0.3); padding: 2px 6px; border-radius: 6px; font-size: 14px; color: #f472b6; }
+        
+        .code-wrapper {
+            position: relative;
+            margin: 12px 0;
+            border-radius: 10px;
+            overflow: hidden;
+            background: #282c34;
+        }
+        
+        .code-wrapper pre { margin: 0; padding: 14px; overflow-x: auto; font-family: 'Fira Code', monospace; }
+        .code-wrapper code { background: transparent; padding: 0; color: inherit; }
+        
+        .copy-code-btn {
+            position: absolute;
+            top: 8px;
+            right: 8px;
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            color: #fff;
+            padding: 4px 10px;
+            border-radius: 6px;
+            font-size: 12px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+        .copy-code-btn:hover { background: var(--accent-cyan); color: #000; }
 
         .chips-bar {
             display: flex;
-            gap: 8px;
-            padding: 0 24px 12px 24px;
+            gap: 10px;
+            padding: 0 24px 14px 24px;
             overflow-x: auto;
         }
 
@@ -196,23 +237,25 @@
             background: rgba(255, 255, 255, 0.05);
             border: 1px solid rgba(255, 255, 255, 0.1);
             color: var(--text-muted);
-            padding: 8px 14px;
+            padding: 8px 16px;
             border-radius: 20px;
             font-size: 13px;
             cursor: pointer;
             white-space: nowrap;
-            transition: all 0.2s ease;
+            transition: all 0.25s ease;
+            font-weight: 500;
         }
 
         .chip:hover { 
             border-color: var(--accent-cyan); 
             color: var(--accent-cyan); 
-            background: rgba(56, 189, 248, 0.1);
+            background: rgba(56, 189, 248, 0.12);
+            transform: translateY(-2px);
         }
 
         #input-area { 
             display: flex; 
-            gap: 10px; 
+            gap: 12px; 
             padding: 18px 24px; 
             background: rgba(11, 15, 25, 0.95);
             border-top: 1px solid var(--card-border);
@@ -220,40 +263,46 @@
 
         input[type="text"] { 
             flex: 1; 
-            padding: 14px 18px; 
-            border-radius: 14px; 
+            padding: 16px 20px; 
+            border-radius: 16px; 
             border: 1px solid rgba(255, 255, 255, 0.12); 
-            background-color: rgba(31, 41, 55, 0.6); 
+            background-color: rgba(30, 41, 59, 0.7); 
             color: #fff; 
             font-size: 15px; 
             font-family: inherit;
             outline: none; 
+            transition: all 0.25s ease;
         }
 
         input[type="text"]:focus { 
             border-color: var(--accent-cyan); 
-            box-shadow: 0 0 12px var(--glow-color);
+            box-shadow: 0 0 15px var(--glow-color);
+            background-color: rgba(30, 41, 59, 0.9);
         }
 
         button.send-btn { 
-            padding: 0 22px; 
-            border-radius: 14px; 
+            padding: 0 26px; 
+            border-radius: 16px; 
             border: none; 
             background: linear-gradient(135deg, var(--accent-cyan), #2563eb); 
             color: #fff; 
-            font-weight: 600; 
+            font-weight: 700; 
             cursor: pointer; 
-            font-size: 15px; 
+            font-size: 16px; 
             display: flex;
             align-items: center;
-            gap: 8px;
-            transition: all 0.2s ease;
+            gap: 10px;
+            transition: all 0.25s ease;
+            box-shadow: 0 4px 15px rgba(37, 99, 235, 0.4);
         }
 
-        button.send-btn:hover { transform: translateY(-1px); }
+        button.send-btn:hover { 
+            transform: translateY(-2px); 
+            box-shadow: 0 6px 20px rgba(56, 189, 248, 0.6);
+        }
 
-        ::-webkit-scrollbar { width: 6px; }
-        ::-webkit-scrollbar-thumb { background: rgba(255, 255, 255, 0.15); border-radius: 10px; }
+        ::-webkit-scrollbar { width: 6px; height: 6px; }
+        ::-webkit-scrollbar-thumb { background: rgba(255, 255, 255, 0.2); border-radius: 10px; }
     </style>
 </head>
 <body>
@@ -266,10 +315,10 @@
         <!-- Header -->
         <div class="chat-header">
             <div class="bot-brand">
-                <div class="avatar-glow"><i class="fa-solid fa-wand-magic-sparkles"></i></div>
+                <div class="avatar-glow"><i class="fa-solid fa-bolt"></i></div>
                 <div>
-                    <h2>Güneş AI</h2>
-                    <span class="status-badge"><span class="status-dot"></span> Çevrimiçi</span>
+                    <h2>Güneş AI Ultra</h2>
+                    <span class="status-badge"><span class="status-dot"></span> ChatGPT'den Zeki & Çevrimiçi</span>
                 </div>
             </div>
             <div class="header-btns">
@@ -281,30 +330,42 @@
         <div id="chat-box">
             <div class="msg-row bot-row">
                 <div class="msg-avatar"><i class="fa-solid fa-robot"></i></div>
-                <div class="msg-content">Merhaba! Ben Güneş AI. Sana bugün nasıl yardımcı olabilirim? 🚀</div>
+                <div class="msg-content">Naber kanka! Ben <b>Güneş AI Ultra</b>. Kod yazma, ders yardımı, oyun önerisi veya aklına gelebilecek her konuda sana ChatGPT'den kat kat hızlı ve zeki cevaplar vermeye hazırım. Ne yapıyoruz bugün? 🚀</div>
             </div>
         </div>
 
         <!-- Quick Questions -->
         <div class="chips-bar">
-            <div class="chip" onclick="sendQuick('Bana ilginç ve az bilinen bir bilgi ver!')">💡 İlginç Bilgi</div>
-            <div class="chip" onclick="sendQuick('Komik ve eğlenceli bir espri yap')">😂 Espri Yap</div>
-            <div class="chip" onclick="sendQuick('Bana harika bir oyun önerisi ver!')">🎮 Oyun Önerisi</div>
+            <div class="chip" onclick="sendQuick('Bana Python ile yapabileceğin süper bir proje fikri ver!')">🐍 Python Projesi</div>
+            <div class="chip" onclick="sendQuick('Bana ilginç ve az bilinen bir bilimsel gerçek anlat')">💡 Şaşırtıcı Bilgi</div>
+            <div class="chip" onclick="sendQuick('Aklımı uçuracak harika bir oyun önerisi ver!')">🎮 Oyun Önerisi</div>
+            <div class="chip" onclick="sendQuick('Komik ve zekice bir espri yap')">😂 Zeki Espri</div>
         </div>
 
         <!-- Input Area -->
         <div id="input-area">
-            <input type="text" id="user-input" placeholder="Bir şeyler yazın..." onkeydown="if(event.key==='Enter') sendMessage()">
-            <button class="send-btn" onclick="sendMessage()"><i class="fa-solid fa-paper-plane"></i></button>
+            <input type="text" id="user-input" placeholder="Güneş AI'ya dilediğin soruyu sor..." onkeydown="if(event.key==='Enter') sendMessage()">
+            <button class="send-btn" onclick="sendMessage()"><i class="fa-solid fa-paper-plane"></i> Gönder</button>
         </div>
     </div>
 
     <script>
-        // API Anahtarını tırnak işaretlerinin arasına yapıştırın:
-        const RAW_KEY = "AIzaSyD1234567890abcdefghijklmnopqrstuvwxyz";
+        // =========================================================================
+        // 🔑 API ANAHTARINI AŞAĞIDAKİ TIRNAK İŞARETLERİNİN İÇİNE YAPIŞTIRIN:
+        // Örnek: const RAW_KEY = "AIzaSyD1234567890abcdefghijklmnopqrstuvwxyz";
+        // =========================================================================
+        const RAW_KEY = "BURAYA_API_KEYINIZI_YAZIN";
         const API_KEY = RAW_KEY.trim();
 
         let chatHistory = [];
+
+        // Marked.js Ayarları (Kod Kopyalama Butonlu Markdown İşleyici)
+        marked.setOptions({
+            highlight: function(code, lang) {
+                const language = hljs.getLanguage(lang) ? lang : 'plaintext';
+                return hljs.highlight(code, { language }).value;
+            }
+        });
 
         function sendQuick(text) {
             document.getElementById('user-input').value = text;
@@ -316,7 +377,7 @@
             document.getElementById('chat-box').innerHTML = `
                 <div class="msg-row bot-row">
                     <div class="msg-avatar"><i class="fa-solid fa-robot"></i></div>
-                    <div class="msg-content">Sohbet temizlendi. Yeni bir soru sorabilirsin! ✨</div>
+                    <div class="msg-content">Sohbet hafızası sıfırlandı. Yeni bir soru sorabilirsin kral! ✨</div>
                 </div>`;
         }
 
@@ -327,6 +388,7 @@
 
             const chatBox = document.getElementById('chat-box');
 
+            // Kullanıcı mesajı ekle
             chatBox.innerHTML += `
                 <div class="msg-row user-row">
                     <div class="msg-avatar"><i class="fa-solid fa-user"></i></div>
@@ -336,21 +398,23 @@
             input.value = '';
             chatBox.scrollTop = chatBox.scrollHeight;
 
+            // API Key Kontrolü
             if (!API_KEY || API_KEY.includes("BURAYA_API_KEYINIZI_YAZIN")) {
                 chatBox.innerHTML += `
                     <div class="msg-row bot-row">
                         <div class="msg-avatar"><i class="fa-solid fa-triangle-exclamation"></i></div>
-                        <div class="msg-content">⚠️ <b>API Anahtarı Tanımlanmamış!</b><br>Koddaki <code>const RAW_KEY = "..."</code> kısmına API anahtarını ekleyip dosyayı kaydedin.</div>
+                        <div class="msg-content">⚠️ <b>API Anahtarı Eksik!</b><br>Koddaki <code>const RAW_KEY = "..."</code> kısmına Google AI Studio'dan aldığın <b>AIzaSy...</b> anahtarını yazmalısın.</div>
                     </div>`;
                 chatBox.scrollTop = chatBox.scrollHeight;
                 return;
             }
 
+            // Düşünüyor animasyonu
             const loadingId = 'loading-' + Date.now();
             chatBox.innerHTML += `
                 <div class="msg-row bot-row" id="${loadingId}">
                     <div class="msg-avatar"><i class="fa-solid fa-robot"></i></div>
-                    <div class="msg-content"><i>Düşünüyor...</i></div>
+                    <div class="msg-content"><i><i class="fa-solid fa-spinner fa-spin"></i> Zekam çalışıyor, düşünüyor...</i></div>
                 </div>`;
             chatBox.scrollTop = chatBox.scrollHeight;
 
@@ -362,7 +426,9 @@
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
                         system_instruction: {
-                            parts: [{ text: "Sen Güneş AI adında samimi, eğlenceli ve yardımsever bir yapay zeka asistanısın. Türkçe yanıt ver." }]
+                            parts: [{ 
+                                text: "Sen Güneş AI adında, dünyanın en zeki, espri anlayışı yüksek, samimi ve uzman bir yapay zeka asistanısın. Türkçe konuşursun. Yanıtlarında Markdown biçimlendirmelerini (kod blokları, kalın yazılar, listeler) ustaca kullanırsın. ChatGPT'den daha bilgili ve çözüm odaklısın." 
+                            }]
                         },
                         contents: chatHistory
                     })
@@ -372,23 +438,29 @@
 
                 if (data.candidates && data.candidates[0] && data.candidates[0].content && data.candidates[0].content.parts[0].text) {
                     const botReply = data.candidates[0].content.parts[0].text;
+                    
                     chatBox.innerHTML += `
                         <div class="msg-row bot-row">
                             <div class="msg-avatar"><i class="fa-solid fa-robot"></i></div>
-                            <div class="msg-content">${formatReply(botReply)}</div>
+                            <div class="msg-content">${renderMarkdown(botReply)}</div>
                         </div>`;
+                    
                     chatHistory.push({ role: "model", parts: [{ text: botReply }] });
+                    
+                    // Kod bloklarına kopyala butonu ve syntax renklendirme uygula
+                    applyCodeBlocks();
+
                 } else if (data.error) {
                     chatBox.innerHTML += `
                         <div class="msg-row bot-row">
                             <div class="msg-avatar"><i class="fa-solid fa-circle-exclamation"></i></div>
-                            <div class="msg-content"><b>Google API Hatası:</b> ${escapeHtml(data.error.message || 'Geçersiz istek.')}</div>
+                            <div class="msg-content"><b>Google API Hatası:</b> ${escapeHtml(data.error.message || 'Geçersiz anahtar.')}</div>
                         </div>`;
                 } else {
                     chatBox.innerHTML += `
                         <div class="msg-row bot-row">
                             <div class="msg-avatar"><i class="fa-solid fa-circle-exclamation"></i></div>
-                            <div class="msg-content">Yanıt alınamadı. Lütfen tekrar deneyin.</div>
+                            <div class="msg-content">Yanıt alınamadı. Lütfen tekrar dene kanka.</div>
                         </div>`;
                 }
 
@@ -396,7 +468,7 @@
                 chatBox.innerHTML += `
                     <div class="msg-row bot-row">
                         <div class="msg-avatar"><i class="fa-solid fa-circle-xmark"></i></div>
-                        <div class="msg-content">Bağlantı hatası oluştu! İnternet bağlantınızı kontrol edin.</div>
+                        <div class="msg-content">Bağlantı hatası oluştu! İnternetini ve API anahtarını kontrol et.</div>
                     </div>`;
             } finally {
                 const loadingElement = document.getElementById(loadingId);
@@ -405,12 +477,35 @@
             }
         }
 
-        function escapeHtml(text) {
-            return text.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+        function renderMarkdown(text) {
+            return marked.parse(text);
         }
 
-        function formatReply(text) {
-            return text.replace(/\*\*(.*?)\*\*/g, '<b>$1</b>').replace(/\n/g, '<br>');
+        function applyCodeBlocks() {
+            document.querySelectorAll('pre code').forEach((block) => {
+                if (!block.parentElement.classList.contains('code-wrapper')) {
+                    const wrapper = document.createElement('div');
+                    wrapper.className = 'code-wrapper';
+                    
+                    const copyBtn = document.createElement('button');
+                    copyBtn.className = 'copy-code-btn';
+                    copyBtn.innerHTML = '<i class="fa-regular fa-copy"></i> Kopyala';
+                    copyBtn.onclick = () => {
+                        navigator.clipboard.writeText(block.innerText);
+                        copyBtn.innerHTML = '<i class="fa-solid fa-check"></i> Kopyalandı!';
+                        setTimeout(() => copyBtn.innerHTML = '<i class="fa-regular fa-copy"></i> Kopyala', 2000);
+                    };
+
+                    block.parentElement.parentNode.insertBefore(wrapper, block.parentElement);
+                    wrapper.appendChild(copyBtn);
+                    wrapper.appendChild(block.parentElement);
+                    hljs.highlightElement(block);
+                }
+            });
+        }
+
+        function escapeHtml(text) {
+            return text.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
         }
     </script>
 </body>
