@@ -300,8 +300,9 @@
     </div>
 
     <script>
-        // Google AI Studio'dan aldığın "AIzaSy..." ile başlayan API anahtarını buraya koy:
-        const API_KEY = "BURAYA_AIzaSy_ILE_BASLAYAN_KEYI_YAZIN";
+        // API Anahtarını tırnak işaretlerinin arasına yapıştırın:
+        const RAW_KEY = "BURAYA_API_KEYINIZI_YAZIN";
+        const API_KEY = RAW_KEY.trim();
 
         let chatHistory = [];
 
@@ -335,12 +336,11 @@
             input.value = '';
             chatBox.scrollTop = chatBox.scrollHeight;
 
-            // API Key kontrolü
-            if (!API_KEY || !API_KEY.startsWith("AIzaSy")) {
+            if (!API_KEY || API_KEY.includes("BURAYA_API_KEYINIZI_YAZIN")) {
                 chatBox.innerHTML += `
                     <div class="msg-row bot-row">
                         <div class="msg-avatar"><i class="fa-solid fa-triangle-exclamation"></i></div>
-                        <div class="msg-content">⚠️ <b>Geçersiz veya Eksik API Anahtarı!</b><br>Koddaki <code>const API_KEY = "..."</code> kısmına <b>AIzaSy</b> ile başlayan Google Gemini API anahtarını yazmalısın.</div>
+                        <div class="msg-content">⚠️ <b>API Anahtarı Tanımlanmamış!</b><br>Koddaki <code>const RAW_KEY = "..."</code> kısmına API anahtarını ekleyip dosyayı kaydedin.</div>
                     </div>`;
                 chatBox.scrollTop = chatBox.scrollHeight;
                 return;
@@ -382,13 +382,13 @@
                     chatBox.innerHTML += `
                         <div class="msg-row bot-row">
                             <div class="msg-avatar"><i class="fa-solid fa-circle-exclamation"></i></div>
-                            <div class="msg-content"><b>Google API Hatası:</b> ${escapeHtml(data.error.message || 'Geçersiz API Anahtarı.')}</div>
+                            <div class="msg-content"><b>Google API Hatası:</b> ${escapeHtml(data.error.message || 'Geçersiz istek.')}</div>
                         </div>`;
                 } else {
                     chatBox.innerHTML += `
                         <div class="msg-row bot-row">
                             <div class="msg-avatar"><i class="fa-solid fa-circle-exclamation"></i></div>
-                            <div class="msg-content">Yanıt alınamadı. API anahtarını kontrol et.</div>
+                            <div class="msg-content">Yanıt alınamadı. Lütfen tekrar deneyin.</div>
                         </div>`;
                 }
 
@@ -396,7 +396,7 @@
                 chatBox.innerHTML += `
                     <div class="msg-row bot-row">
                         <div class="msg-avatar"><i class="fa-solid fa-circle-xmark"></i></div>
-                        <div class="msg-content">Bağlantı hatası oluştu! İnternet bağlantını veya API anahtarını kontrol et.</div>
+                        <div class="msg-content">Bağlantı hatası oluştu! İnternet bağlantınızı kontrol edin.</div>
                     </div>`;
             } finally {
                 const loadingElement = document.getElementById(loadingId);
@@ -410,7 +410,7 @@
         }
 
         function formatReply(text) {
-            return text.replace(/\n/g, '<br>');
+            return text.replace(/\*\*(.*?)\*\*/g, '<b>$1</b>').replace(/\n/g, '<br>');
         }
     </script>
 </body>
