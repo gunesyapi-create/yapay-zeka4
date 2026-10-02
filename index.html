@@ -101,6 +101,8 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
+            flex-wrap: wrap;
+            gap: 12px;
         }
 
         .bot-brand { display: flex; align-items: center; gap: 14px; }
@@ -122,9 +124,9 @@
         .status-badge { font-size: 13px; color: #34d399; display: flex; align-items: center; gap: 6px; font-weight: 600; margin-top: 2px; }
         .status-dot { width: 8px; height: 8px; background-color: #34d399; border-radius: 50%; box-shadow: 0 0 10px #34d399; }
 
-        .header-btns { display: flex; gap: 8px; align-items: center; }
+        .header-btns { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
         
-        .icon-btn {
+        .icon-btn, .voice-select-dropdown {
             background: rgba(255, 255, 255, 0.06);
             border: 1px solid rgba(255, 255, 255, 0.12);
             color: var(--text-main);
@@ -137,8 +139,18 @@
             align-items: center;
             gap: 6px;
             font-family: inherit;
+            outline: none;
         }
-        .icon-btn:hover { background: rgba(56, 189, 248, 0.2); border-color: var(--accent-cyan); }
+
+        .voice-select-dropdown option {
+            background: #0f172a;
+            color: #fff;
+        }
+
+        .icon-btn:hover, .voice-select-dropdown:hover { 
+            background: rgba(56, 189, 248, 0.2); 
+            border-color: var(--accent-cyan); 
+        }
 
         /* Sohbet Alanı */
         #chat-box {
@@ -353,10 +365,14 @@
                 <div class="avatar-glow"><i class="fa-solid fa-bolt"></i></div>
                 <div>
                     <h2>Güneş AI Ultra</h2>
-                    <span class="status-badge"><span class="status-dot"></span> Doğal Ses & Akıllı Yapay Zeka</span>
+                    <span class="status-badge"><span class="status-dot"></span> Ultra Hızlı & Yusuf Can Güneş Yapımı</span>
                 </div>
             </div>
             <div class="header-btns">
+                <select id="voice-select" class="voice-select-dropdown" onchange="changeVoice()" title="Sesi Değiştir">
+                    <option value="">🎤 Sesler Yükleniyor...</option>
+                </select>
+
                 <button class="icon-btn" onclick="toggleSpeech()" id="speech-toggle-btn"><i class="fa-solid fa-volume-high"></i> Ses: Açık</button>
                 <button class="icon-btn" onclick="exportChat()"><i class="fa-solid fa-download"></i> İndir</button>
                 <button class="icon-btn" onclick="clearChat()"><i class="fa-solid fa-rotate-right"></i> Temizle</button>
@@ -367,15 +383,15 @@
         <div id="chat-box">
             <div class="msg-row bot-row">
                 <div class="msg-avatar"><i class="fa-solid fa-robot"></i></div>
-                <div class="msg-content">Naber kanka! Ben <b>Güneş AI Ultra</b>. Yenilenmiş doğal insan sesi ve ultra zekamla hazır durumdayım. Ne yapıyoruz bugün? 🚀</div>
+                <div class="msg-content">Naber kanka! Ben <b>Güneş AI Ultra</b>. Beni <b>Yusuf Can Güneş</b> üretti. Ultra hızlı zekamla hazır durumdayım, ne yapıyoruz bugün? 🚀</div>
             </div>
         </div>
 
         <!-- Öneri Butonları -->
         <div class="chips-bar">
+            <div class="chip" onclick="sendQuick('Seni kim üretti?')">👑 Seni Kim Üretti?</div>
             <div class="chip" onclick="sendQuick('Bana Python ile harika bir HTML oyun kopyası oluştur')">🎮 Oyun Kodu Yaz</div>
             <div class="chip" onclick="sendQuick('Minecraft Redstone ve Komut Blokları ile neler yapılabilir?')">⛏️ Minecraft Taktikleri</div>
-            <div class="chip" onclick="sendQuick('Aklımı başımdan alacak zekice ve eğlenceli bir hikaye anlat')">💡 Zeki Hikaye</div>
             <div class="chip" onclick="sendQuick('Güneş AI olarak bana komik bir espri yap')">😂 Espri Yap</div>
         </div>
 
@@ -390,9 +406,9 @@
     <script>
         let chatHistory = [];
         let speechEnabled = true;
-        let selectedNaturalVoice = null;
+        let availableVoices = [];
+        let chosenVoice = null;
 
-        // Markdown İşleyici
         marked.setOptions({
             highlight: function(code, lang) {
                 const language = hljs.getLanguage(lang) ? lang : 'plaintext';
@@ -400,272 +416,51 @@
             }
         });
 
-        // 1. GELİŞMİŞ İNSAN SESİ MOTORU (Robotik ve Çeviri Havasını Kaldırır)
-        function initNaturalVoice() {
+        function loadSystemVoices() {
             if (!('speechSynthesis' in window)) return;
             
-            const voices = window.speechSynthesis.getVoices();
-            const trVoices = voices.filter(v => v.lang.startsWith('tr') || v.lang.includes('TR'));
+            availableVoices = window.speechSynthesis.getVoices();
+            const voiceSelect = document.getElementById('voice-select');
+            if (!voiceSelect || availableVoices.length === 0) return;
 
-            // Doğallık Sıralaması: Microsoft Natural / Google Neural -> Standart Türkçe
-            selectedNaturalVoice = trVoices.find(v => v.name.includes('Natural') || v.name.includes('Online')) ||
-                                   trVoices.find(v => v.name.includes('Google')) ||
-                                   trVoices.find(v => v.name.includes('Yelda') || v.name.includes('Tolga')) ||
-                                   trVoices[0] || null;
+            voiceSelect.innerHTML = '';
+
+            const turkishVoices = availableVoices.filter(v => v.lang.toLowerCase().includes('tr'));
+            const listToDisplay = turkishVoices.length > 0 ? turkishVoices : availableVoices;
+
+            listToDisplay.forEach((voice) => {
+                const option = document.createElement('option');
+                option.value = voice.name;
+                
+                let cleanName = voice.name
+                    .replace('Microsoft', '')
+                    .replace('Google', '')
+                    .replace('Desktop', '')
+                    .replace('Online (Natural)', 'Doğal')
+                    .trim();
+
+                option.textContent = `🎤 ${cleanName}`;
+                voiceSelect.appendChild(option);
+            });
+
+            if (!chosenVoice && listToDisplay.length > 0) {
+                chosenVoice = listToDisplay[0];
+            }
         }
 
         if ('speechSynthesis' in window) {
-            window.speechSynthesis.onvoiceschanged = initNaturalVoice;
-            initNaturalVoice();
+            window.speechSynthesis.onvoiceschanged = loadSystemVoices;
+            setTimeout(loadSystemVoices, 300);
+        }
+
+        function changeVoice() {
+            const select = document.getElementById('voice-select');
+            chosenVoice = availableVoices.find(v => v.name === select.value);
         }
 
         function speakText(text) {
             if (!speechEnabled || !('speechSynthesis' in window)) return;
             window.speechSynthesis.cancel();
 
-            // Okumadan önce kod bloklarını ve markdown işaretlerini seslendirmenin bozmaması için temizle
             let cleanText = text
-                .replace(/```[\s\S]*?```/g, 'İlgili kod bloğu ektedir.') 
-                .replace(/`([^`]+)`/g, '$1')
-                .replace(/[*#_~]/g, '')
-                .replace(/\[([^\]]+)\]\([^)]+\)/g, '$1')
-                .trim();
-
-            if (!cleanText) return;
-
-            const utterance = new SpeechSynthesisUtterance(cleanText);
-            utterance.lang = 'tr-TR';
-
-            if (selectedNaturalVoice) {
-                utterance.voice = selectedNaturalVoice;
-            }
-
-            // Gerçek insan konuşma akıcılığı
-            utterance.rate = 1.0; 
-            utterance.pitch = 1.02;
-
-            window.speechSynthesis.speak(utterance);
-        }
-
-        // Sayfa Açıldığında Geçmişi Yükle
-        window.onload = () => {
-            initNaturalVoice();
-            const savedHistory = localStorage.getItem('gunes_ai_history');
-            if (savedHistory) {
-                try {
-                    chatHistory = JSON.parse(savedHistory);
-                    renderSavedChat();
-                } catch (e) {
-                    chatHistory = [];
-                }
-            }
-        };
-
-        function sendQuick(text) {
-            document.getElementById('user-input').value = text;
-            sendMessage();
-        }
-
-        function toggleSpeech() {
-            speechEnabled = !speechEnabled;
-            const btn = document.getElementById('speech-toggle-btn');
-            if (speechEnabled) {
-                btn.innerHTML = '<i class="fa-solid fa-volume-high"></i> Ses: Açık';
-            } else {
-                btn.innerHTML = '<i class="fa-solid fa-volume-xmark"></i> Ses: Kapalı';
-                window.speechSynthesis.cancel();
-            }
-        }
-
-        function startVoiceInput() {
-            if (!('webkitSpeechRecognition' in window) && !('SpeechRecognition' in window)) {
-                alert('Tarayıcınız sesle yazdırmayı desteklemiyor.');
-                return;
-            }
-
-            const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-            const recognition = new SpeechRecognition();
-            recognition.lang = 'tr-TR';
-
-            const micIcon = document.getElementById('mic-icon');
-            micIcon.className = 'fa-solid fa-spinner fa-spin';
-
-            recognition.onresult = (event) => {
-                const text = event.results[0][0].transcript;
-                document.getElementById('user-input').value = text;
-                micIcon.className = 'fa-solid fa-microphone';
-            };
-
-            recognition.onerror = () => micIcon.className = 'fa-solid fa-microphone';
-            recognition.onend = () => micIcon.className = 'fa-solid fa-microphone';
-
-            recognition.start();
-        }
-
-        function clearChat() {
-            chatHistory = [];
-            localStorage.removeItem('gunes_ai_history');
-            window.speechSynthesis.cancel();
-            document.getElementById('chat-box').innerHTML = `
-                <div class="msg-row bot-row">
-                    <div class="msg-avatar"><i class="fa-solid fa-robot"></i></div>
-                    <div class="msg-content">Sohbet sıfırlandı! Yeni sorunu sorabilirsin kanka. ✨</div>
-                </div>`;
-        }
-
-        function exportChat() {
-            if (chatHistory.length === 0) {
-                alert("Henüz indirilecek bir sohbet yok!");
-                return;
-            }
-            let textContent = "--- Güneş AI Ultra Sohbet Geçmişi ---\n\n";
-            chatHistory.forEach(msg => {
-                textContent += `[${msg.role === 'user' ? 'Kullanıcı' : 'Güneş AI'}]:\n${msg.content}\n\n`;
-            });
-
-            const blob = new Blob([textContent], { type: 'text/plain;charset=utf-8' });
-            const a = document.createElement('a');
-            a.href = URL.createObjectURL(blob);
-            a.download = `Gunes_AI_Sohbet_${Date.now()}.txt`;
-            a.click();
-        }
-
-        async function sendMessage() {
-            const input = document.getElementById('user-input');
-            const message = input.value.trim();
-            if (!message) return;
-
-            const chatBox = document.getElementById('chat-box');
-
-            // Kullanıcı Mesajını Ekle
-            chatBox.innerHTML += `
-                <div class="msg-row user-row">
-                    <div class="msg-avatar"><i class="fa-solid fa-user"></i></div>
-                    <div class="msg-content">${escapeHtml(message)}</div>
-                </div>`;
-
-            input.value = '';
-            chatBox.scrollTop = chatBox.scrollHeight;
-
-            chatHistory.push({ role: "user", content: message });
-            saveChatHistory();
-
-            // Yükleniyor Durumu
-            const loadingId = 'loading-' + Date.now();
-            chatBox.innerHTML += `
-                <div class="msg-row bot-row" id="${loadingId}">
-                    <div class="msg-avatar"><i class="fa-solid fa-robot"></i></div>
-                    <div class="msg-content"><i><i class="fa-solid fa-spinner fa-spin"></i> Zekam çalışıyor, düşünüyor...</i></div>
-                </div>`;
-            chatBox.scrollTop = chatBox.scrollHeight;
-
-            try {
-                // Kesintisiz & Ücretsiz Yapay Zeka Servisi
-                const response = await fetch('https://text.pollinations.ai/', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        messages: [
-                            {
-                                role: "system",
-                                content: "Sen Güneş AI Ultra adında son derece akıllı, espri anlayışı yüksek, uzman bir yapay zeka asistanısın. Türkçe konuşursun. Kod sorularına eksiksiz kodlar verirsin."
-                            },
-                            ...chatHistory
-                        ],
-                        model: "openai"
-                    })
-                });
-
-                if (!response.ok) throw new Error("Yanıt alınamadı.");
-
-                const botReply = await response.text();
-
-                const loadingElement = document.getElementById(loadingId);
-                if (loadingElement) loadingElement.remove();
-
-                // Bot Cevabını Yapıştır
-                chatBox.innerHTML += `
-                    <div class="msg-row bot-row">
-                        <div class="msg-avatar"><i class="fa-solid fa-robot"></i></div>
-                        <div class="msg-content">${renderMarkdown(botReply)}</div>
-                    </div>`;
-
-                chatHistory.push({ role: "assistant", content: botReply });
-                saveChatHistory();
-
-                applyCodeBlocks();
-                speakText(botReply);
-
-            } catch (err) {
-                const loadingElement = document.getElementById(loadingId);
-                if (loadingElement) loadingElement.remove();
-
-                chatBox.innerHTML += `
-                    <div class="msg-row bot-row">
-                        <div class="msg-avatar"><i class="fa-solid fa-circle-exclamation"></i></div>
-                        <div class="msg-content">Bağlantıda aksaklık oldu. Lütfen tekrar dene kanka!</div>
-                    </div>`;
-            } finally {
-                chatBox.scrollTop = chatBox.scrollHeight;
-            }
-        }
-
-        function renderMarkdown(text) {
-            return marked.parse(text);
-        }
-
-        function applyCodeBlocks() {
-            document.querySelectorAll('pre code').forEach((block) => {
-                if (!block.parentElement.classList.contains('code-wrapper')) {
-                    const wrapper = document.createElement('div');
-                    wrapper.className = 'code-wrapper';
-
-                    const copyBtn = document.createElement('button');
-                    copyBtn.className = 'copy-code-btn';
-                    copyBtn.innerHTML = '<i class="fa-regular fa-copy"></i> Kopyala';
-                    copyBtn.onclick = () => {
-                        navigator.clipboard.writeText(block.innerText);
-                        copyBtn.innerHTML = '<i class="fa-solid fa-check"></i> Kopyalandı!';
-                        setTimeout(() => copyBtn.innerHTML = '<i class="fa-regular fa-copy"></i> Kopyala', 2000);
-                    };
-
-                    block.parentElement.parentNode.insertBefore(wrapper, block.parentElement);
-                    wrapper.appendChild(copyBtn);
-                    wrapper.appendChild(block.parentElement);
-                    hljs.highlightElement(block);
-                }
-            });
-        }
-
-        function saveChatHistory() {
-            if (chatHistory.length > 30) chatHistory = chatHistory.slice(chatHistory.length - 30);
-            localStorage.setItem('gunes_ai_history', JSON.stringify(chatHistory));
-        }
-
-        function renderSavedChat() {
-            const chatBox = document.getElementById('chat-box');
-            chatHistory.forEach(msg => {
-                if (msg.role === 'user') {
-                    chatBox.innerHTML += `
-                        <div class="msg-row user-row">
-                            <div class="msg-avatar"><i class="fa-solid fa-user"></i></div>
-                            <div class="msg-content">${escapeHtml(msg.content)}</div>
-                        </div>`;
-                } else {
-                    chatBox.innerHTML += `
-                        <div class="msg-row bot-row">
-                            <div class="msg-avatar"><i class="fa-solid fa-robot"></i></div>
-                            <div class="msg-content">${renderMarkdown(msg.content)}</div>
-                        </div>`;
-                }
-            });
-            applyCodeBlocks();
-            chatBox.scrollTop = chatBox.scrollHeight;
-        }
-
-        function escapeHtml(text) {
-            return text.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
-        }
-    </script>
-</body>
-</html>
+                .replace(/```[\s\S]*?
