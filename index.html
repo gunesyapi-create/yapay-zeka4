@@ -3,9 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Güneş AI Ultra - Zeki Dijital Asistan</title>
+    <title>Güneş AI Ultra - Akıllı Asistan</title>
     
-    <!-- Dış Kütüphaneler (FontAwesome, Google Fonts, Marked.js, Highlight.js) -->
+    <!-- Dış Kütüphaneler -->
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Fira+Code:wght@400;500&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/atom-one-dark.min.css">
@@ -14,9 +14,6 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/highlight.min.js"></script>
 
     <style>
-        /* ==========================================
-           TEMA VARYASYONLARI VE TEMEL STİLLER
-           ========================================== */
         :root {
             --bg-dark: #030712;
             --card-bg: rgba(15, 23, 42, 0.85);
@@ -78,7 +75,7 @@
             100% { transform: translate(40px, 30px) scale(1.1); }
         }
 
-        /* Ana Chat Konteyneri */
+        /* Ana Container */
         .chat-container {
             position: relative;
             z-index: 10;
@@ -96,7 +93,7 @@
             overflow: hidden;
         }
 
-        /* Üst Başlık (Header) */
+        /* Başlık Alanı */
         .chat-header {
             padding: 16px 24px;
             background: rgba(11, 15, 25, 0.95);
@@ -125,7 +122,8 @@
         .status-badge { font-size: 13px; color: #34d399; display: flex; align-items: center; gap: 6px; font-weight: 600; margin-top: 2px; }
         .status-dot { width: 8px; height: 8px; background-color: #34d399; border-radius: 50%; box-shadow: 0 0 10px #34d399; }
 
-        .header-btns { display: flex; gap: 8px; }
+        .header-btns { display: flex; gap: 8px; align-items: center; }
+        
         .icon-btn {
             background: rgba(255, 255, 255, 0.06);
             border: 1px solid rgba(255, 255, 255, 0.12);
@@ -142,7 +140,7 @@
         }
         .icon-btn:hover { background: rgba(56, 189, 248, 0.2); border-color: var(--accent-cyan); }
 
-        /* Mesaj Alanı */
+        /* Sohbet Alanı */
         #chat-box {
             flex: 1;
             padding: 24px;
@@ -205,7 +203,6 @@
             border: 1px solid rgba(255, 255, 255, 0.08);
         }
 
-        /* Biçimlendirme Kuralları */
         .msg-content p { margin-bottom: 10px; }
         .msg-content p:last-child { margin-bottom: 0; }
         .msg-content h1, .msg-content h2, .msg-content h3 { margin: 14px 0 8px 0; color: var(--accent-cyan); }
@@ -240,7 +237,6 @@
         }
         .copy-code-btn:hover { background: var(--accent-cyan); color: #000; }
 
-        /* Hızlı Soru Butonları */
         .chips-bar {
             display: flex;
             gap: 10px;
@@ -268,7 +264,6 @@
             transform: translateY(-2px);
         }
 
-        /* Girdi Alanı */
         #input-area {
             display: flex;
             gap: 12px;
@@ -352,13 +347,13 @@
     <div class="blob blob-2"></div>
 
     <div class="chat-container">
-        <!-- Başlık Paneli -->
+        <!-- Panel Üst Bar -->
         <div class="chat-header">
             <div class="bot-brand">
                 <div class="avatar-glow"><i class="fa-solid fa-bolt"></i></div>
                 <div>
                     <h2>Güneş AI Ultra</h2>
-                    <span class="status-badge"><span class="status-dot"></span> Sınırsız & %100 Çevrimiçi</span>
+                    <span class="status-badge"><span class="status-dot"></span> Doğal Ses & Akıllı Yapay Zeka</span>
                 </div>
             </div>
             <div class="header-btns">
@@ -368,23 +363,23 @@
             </div>
         </div>
 
-        <!-- Sohbet Alanı -->
+        <!-- Sohbet Akışı -->
         <div id="chat-box">
             <div class="msg-row bot-row">
                 <div class="msg-avatar"><i class="fa-solid fa-robot"></i></div>
-                <div class="msg-content">Selam! Ben <b>Güneş AI Ultra</b>. Hiçbir sınırlama ve API anahtarı olmadan tamamen özgürce çalışıyorum. Kod yazma, matematik çözme, oyun taktikleri, ödevler veya sohbet etmek istediğin her konuda bana soru sorabilirsin! 🚀</div>
+                <div class="msg-content">Naber kanka! Ben <b>Güneş AI Ultra</b>. Yenilenmiş doğal insan sesi ve ultra zekamla hazır durumdayım. Ne yapıyoruz bugün? 🚀</div>
             </div>
         </div>
 
-        <!-- Hızlı Sorular Barı -->
+        <!-- Öneri Butonları -->
         <div class="chips-bar">
-            <div class="chip" onclick="sendQuick('Bana Python ile harika bir HTML oyun projesi kodu yaz!')">🎮 Oyun Kodu Yaz</div>
-            <div class="chip" onclick="sendQuick('Minecraft Towny ve Redstone sistemleri hakkında tüyo ver')">⛏️ Minecraft Taktikleri</div>
-            <div class="chip" onclick="sendQuick('Bana evde yapabileceğim bilimsel ve eğlenceli bir deney anlat')">🧪 Eğlenceli Deney</div>
-            <div class="chip" onclick="sendQuick('Aklımı başımdan alacak süper zeki bir espri yap')">😂 Zeki Espri</div>
+            <div class="chip" onclick="sendQuick('Bana Python ile harika bir HTML oyun kopyası oluştur')">🎮 Oyun Kodu Yaz</div>
+            <div class="chip" onclick="sendQuick('Minecraft Redstone ve Komut Blokları ile neler yapılabilir?')">⛏️ Minecraft Taktikleri</div>
+            <div class="chip" onclick="sendQuick('Aklımı başımdan alacak zekice ve eğlenceli bir hikaye anlat')">💡 Zeki Hikaye</div>
+            <div class="chip" onclick="sendQuick('Güneş AI olarak bana komik bir espri yap')">😂 Espri Yap</div>
         </div>
 
-        <!-- Mesaj Girdi Paneli -->
+        <!-- Alt Input Bar -->
         <div id="input-area">
             <button class="action-btn" onclick="startVoiceInput()" title="Sesle Yaz"><i class="fa-solid fa-microphone" id="mic-icon"></i></button>
             <input type="text" id="user-input" placeholder="Güneş AI'ya dilediğin soruyu sor..." onkeydown="if(event.key==='Enter') sendMessage()">
@@ -393,14 +388,11 @@
     </div>
 
     <script>
-        /* =========================================================================
-           GÜNEŞ AI ULTRA - ÇEKİRDEK JAVASCRIPT MOTORU
-           ========================================================================= */
-
         let chatHistory = [];
         let speechEnabled = true;
+        let selectedNaturalVoice = null;
 
-        // Markdown İşleyici Ayarları
+        // Markdown İşleyici
         marked.setOptions({
             highlight: function(code, lang) {
                 const language = hljs.getLanguage(lang) ? lang : 'plaintext';
@@ -408,8 +400,56 @@
             }
         });
 
-        // Sayfa Yüklendiğinde Geçmişi Yükle
+        // 1. GELİŞMİŞ İNSAN SESİ MOTORU (Robotik ve Çeviri Havasını Kaldırır)
+        function initNaturalVoice() {
+            if (!('speechSynthesis' in window)) return;
+            
+            const voices = window.speechSynthesis.getVoices();
+            const trVoices = voices.filter(v => v.lang.startsWith('tr') || v.lang.includes('TR'));
+
+            // Doğallık Sıralaması: Microsoft Natural / Google Neural -> Standart Türkçe
+            selectedNaturalVoice = trVoices.find(v => v.name.includes('Natural') || v.name.includes('Online')) ||
+                                   trVoices.find(v => v.name.includes('Google')) ||
+                                   trVoices.find(v => v.name.includes('Yelda') || v.name.includes('Tolga')) ||
+                                   trVoices[0] || null;
+        }
+
+        if ('speechSynthesis' in window) {
+            window.speechSynthesis.onvoiceschanged = initNaturalVoice;
+            initNaturalVoice();
+        }
+
+        function speakText(text) {
+            if (!speechEnabled || !('speechSynthesis' in window)) return;
+            window.speechSynthesis.cancel();
+
+            // Okumadan önce kod bloklarını ve markdown işaretlerini seslendirmenin bozmaması için temizle
+            let cleanText = text
+                .replace(/```[\s\S]*?```/g, 'İlgili kod bloğu ektedir.') 
+                .replace(/`([^`]+)`/g, '$1')
+                .replace(/[*#_~]/g, '')
+                .replace(/\[([^\]]+)\]\([^)]+\)/g, '$1')
+                .trim();
+
+            if (!cleanText) return;
+
+            const utterance = new SpeechSynthesisUtterance(cleanText);
+            utterance.lang = 'tr-TR';
+
+            if (selectedNaturalVoice) {
+                utterance.voice = selectedNaturalVoice;
+            }
+
+            // Gerçek insan konuşma akıcılığı
+            utterance.rate = 1.0; 
+            utterance.pitch = 1.02;
+
+            window.speechSynthesis.speak(utterance);
+        }
+
+        // Sayfa Açıldığında Geçmişi Yükle
         window.onload = () => {
+            initNaturalVoice();
             const savedHistory = localStorage.getItem('gunes_ai_history');
             if (savedHistory) {
                 try {
@@ -437,21 +477,9 @@
             }
         }
 
-        function speakText(text) {
-            if (!speechEnabled || !('speechSynthesis' in window)) return;
-            window.speechSynthesis.cancel();
-            
-            // Markdown karakterlerini sesten temizle
-            const cleanText = text.replace(/[*#`_~]/g, '');
-            const utterance = new SpeechSynthesisUtterance(cleanText);
-            utterance.lang = 'tr-TR';
-            utterance.rate = 1.0;
-            window.speechSynthesis.speak(utterance);
-        }
-
         function startVoiceInput() {
             if (!('webkitSpeechRecognition' in window) && !('SpeechRecognition' in window)) {
-                alert('Tarayıcınız sesle yazmayı desteklemiyor.');
+                alert('Tarayıcınız sesle yazdırmayı desteklemiyor.');
                 return;
             }
 
@@ -468,13 +496,8 @@
                 micIcon.className = 'fa-solid fa-microphone';
             };
 
-            recognition.onerror = () => {
-                micIcon.className = 'fa-solid fa-microphone';
-            };
-
-            recognition.onend = () => {
-                micIcon.className = 'fa-solid fa-microphone';
-            };
+            recognition.onerror = () => micIcon.className = 'fa-solid fa-microphone';
+            recognition.onend = () => micIcon.className = 'fa-solid fa-microphone';
 
             recognition.start();
         }
@@ -486,7 +509,7 @@
             document.getElementById('chat-box').innerHTML = `
                 <div class="msg-row bot-row">
                     <div class="msg-avatar"><i class="fa-solid fa-robot"></i></div>
-                    <div class="msg-content">Sohbet sıfırlandı! Yeni bir soru sorabilirsin. ✨</div>
+                    <div class="msg-content">Sohbet sıfırlandı! Yeni sorunu sorabilirsin kanka. ✨</div>
                 </div>`;
         }
 
@@ -514,7 +537,7 @@
 
             const chatBox = document.getElementById('chat-box');
 
-            // Kullanıcı Mesajını Ekrana Ekle
+            // Kullanıcı Mesajını Ekle
             chatBox.innerHTML += `
                 <div class="msg-row user-row">
                     <div class="msg-avatar"><i class="fa-solid fa-user"></i></div>
@@ -527,17 +550,17 @@
             chatHistory.push({ role: "user", content: message });
             saveChatHistory();
 
-            // Yükleniyor Animasyonu
+            // Yükleniyor Durumu
             const loadingId = 'loading-' + Date.now();
             chatBox.innerHTML += `
                 <div class="msg-row bot-row" id="${loadingId}">
                     <div class="msg-avatar"><i class="fa-solid fa-robot"></i></div>
-                    <div class="msg-content"><i><i class="fa-solid fa-spinner fa-spin"></i> Düşünüyor ve cevabı hazırlıyorum...</i></div>
+                    <div class="msg-content"><i><i class="fa-solid fa-spinner fa-spin"></i> Zekam çalışıyor, düşünüyor...</i></div>
                 </div>`;
             chatBox.scrollTop = chatBox.scrollHeight;
 
             try {
-                // Herhangi bir API Anahtarı Gerektirmeyen Doğrudan Ücretsiz Yapay Zeka Servisi
+                // Kesintisiz & Ücretsiz Yapay Zeka Servisi
                 const response = await fetch('https://text.pollinations.ai/', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
@@ -545,7 +568,7 @@
                         messages: [
                             {
                                 role: "system",
-                                content: "Sen Güneş AI Ultra adında, dünyanın en bilgili, zeki, espri anlayışı yüksek ve uzman bir yapay zeka asistanısın. Türkçe konuşursun. Kod sorularına eksiksiz kodlar yazarsın. Formatlama için Markdown kullanırsın."
+                                content: "Sen Güneş AI Ultra adında son derece akıllı, espri anlayışı yüksek, uzman bir yapay zeka asistanısın. Türkçe konuşursun. Kod sorularına eksiksiz kodlar verirsin."
                             },
                             ...chatHistory
                         ],
@@ -553,15 +576,14 @@
                     })
                 });
 
-                if (!response.ok) throw new Error("Sunucu yanıt vermedi.");
+                if (!response.ok) throw new Error("Yanıt alınamadı.");
 
                 const botReply = await response.text();
 
-                // Yükleniyor Mesajını Kaldır
                 const loadingElement = document.getElementById(loadingId);
                 if (loadingElement) loadingElement.remove();
 
-                // Bot Cevabını Ekle
+                // Bot Cevabını Yapıştır
                 chatBox.innerHTML += `
                     <div class="msg-row bot-row">
                         <div class="msg-avatar"><i class="fa-solid fa-robot"></i></div>
@@ -581,7 +603,7 @@
                 chatBox.innerHTML += `
                     <div class="msg-row bot-row">
                         <div class="msg-avatar"><i class="fa-solid fa-circle-exclamation"></i></div>
-                        <div class="msg-content">Bağlantıda küçük bir aksaklık oldu. Lütfen tekrar dene kanka!</div>
+                        <div class="msg-content">Bağlantıda aksaklık oldu. Lütfen tekrar dene kanka!</div>
                     </div>`;
             } finally {
                 chatBox.scrollTop = chatBox.scrollHeight;
@@ -616,10 +638,7 @@
         }
 
         function saveChatHistory() {
-            // Son 30 mesajı hafızada tut
-            if (chatHistory.length > 30) {
-                chatHistory = chatHistory.slice(chatHistory.length - 30);
-            }
+            if (chatHistory.length > 30) chatHistory = chatHistory.slice(chatHistory.length - 30);
             localStorage.setItem('gunes_ai_history', JSON.stringify(chatHistory));
         }
 
